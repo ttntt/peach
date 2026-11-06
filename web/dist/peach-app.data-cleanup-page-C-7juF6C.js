@@ -1,10 +1,10 @@
 (function() {
 	try {
 		var e = typeof globalThis < "u" ? globalThis : typeof window < "u" ? window : typeof global < "u" ? global : typeof self < "u" ? self : {}, t = new e.Error().stack;
-		t && (e._sentryDebugIds = e._sentryDebugIds || {}, e._sentryDebugIds[t] = "f068ff37-58fc-4e58-9bdb-bacd1069d40a", e._sentryDebugIdIdentifier = "sentry-dbid-f068ff37-58fc-4e58-9bdb-bacd1069d40a");
+		t && (e._sentryDebugIds = e._sentryDebugIds || {}, e._sentryDebugIds[t] = "c60085da-4641-4b24-9a9d-080aaab4d755", e._sentryDebugIdIdentifier = "sentry-dbid-c60085da-4641-4b24-9a9d-080aaab4d755");
 	} catch {}
 })();
-import { BATCH_DELETE_TEXT as e, Button as t, CLEANUP_ENTRY as n, CLEANUP_ENTRY_GRID as r, CLEANUP_HASH_REDIRECTS as i, CLEANUP_TOOLS as a, Chip as o, DIRECTORY_TEMPLATE_ERROR as s, DUPLICATES_KEY as c, Fieldset as l, FieldsetTitle as u, IDLE_REPAIR as d, IconButton as f, IndexSearch as p, Input as m, JUNK_KEY as h, LINKS_KEY as g, LINK_CHECK_KEY as _, LINK_KINDS as v, LINK_PRUNE_KEY as ee, LOC as y, LibraryProcessingCard as b, MEDIA_REPAIR_KEY as x, MEDIA_REPAIR_URL as S, MEDIA_SOURCES_KEY as C, MEDIA_SOURCE_ICONS as w, Note as T, ORGANIZE_KEY as te, ORGANIZE_PARAMETER_HINT as ne, ORGANIZE_SCOPE_HINT as re, ORGANIZE_TEXT as E, ORPHAN_RECORDS_KEY as D, ORPHAN_RECORDS_TEXT as O, PERFORMER_DELETE_KEY as k, PLAIN_STAT_STRIP as ie, PlainStat as A, Progress as j, QUALITY_GOALS_KEY as ae, REPAIR_CARD_TEXT as M, REPAIR_LIBRARIES_KEY as oe, RESOURCE_APPLY_KEY as se, RESOURCE_SCAN_KEY as N, RESOURCE_SYNC_TEXT as P, RESULT_PANEL as F, RESULT_SECTION as I, REVIEW_COUNTS_KEY as ce, SOURCE_LABELS as L, SectionHeading as le, Select as ue, SelectItem as de, SourceMark as fe, StatusLabel as pe, TRASH_KEY as R, TaskProgress as z, Wt as me, __toESM as he, apiSend as ge, applyConfirmText as _e, applyLeftovers as B, applyPlanText as ve, applyText as V, attachOrphan as ye, baseName as be, busyProps as H, candidateText as xe, checkLine as Se, confirmModal as U, cx as Ce, deletePerformerVideos as we, entityDisplayName as Te, entityFaceImg as Ee, entityPath as De, errorMessage as W, esc as Oe, fetchDeletePerformers as ke, fetchDeletePlan as Ae, fetchDuplicates as je, fetchJunkSummary as Me, fetchLinkCheck as Ne, fetchLinkPrune as Pe, fetchLinkStats as Fe, fetchMediaRepair as Ie, fetchMediaSources as Le, fetchOrganize as Re, fetchOrganizeExample as ze, fetchOrphanRecords as Be, fetchQualityGoals as Ve, fetchRepairLibraries as He, fetchResourceApply as Ue, fetchResourceScan as We, fetchReviewCounts as Ge, fetchTrashSummary as Ke, firstGrapheme as qe, fmtSize as G, hasChanges as Je, hasResourceRoots as Ye, junkBreakdown as Xe, missingToolText as Ze, nameFallback as Qe, organizeOutcome as $e, pickOrganizeFolder as et, plainStatClass as K, planSummary as tt, previewOrganize as nt, pruneText as rt, purgeCount as it, purgeOrphan as at, queryClient as q, recordsText as ot, rememberTemplates as st, require_jsx_runtime as ct, require_react as lt, reviewSummary as ut, scanLine as dt, shellNavigate as ft, sourceMeta as pt, spriteGlyph as J, startLinkCheck as mt, startLinkPrune as ht, startOrganize as gt, startResourceApply as _t, startResourceScan as vt, statusLine as yt, useAction as bt, useBackgroundJob as Y, useEntityNames as xt, useMutation as St, useQuery as X, withOrganizeJob as Ct } from "./peach-app.js";
+import { BATCH_DELETE_TEXT as e, Button as t, CLEANUP_ENTRY as n, CLEANUP_ENTRY_GRID as r, CLEANUP_HASH_REDIRECTS as i, CLEANUP_TOOLS as a, Chip as o, DIRECTORY_TEMPLATE_ERROR as s, DUPLICATES_KEY as c, Fieldset as l, FieldsetTitle as u, IDLE_REPAIR as d, IconButton as f, IndexSearch as p, Input as m, JUNK_KEY as h, LINKS_KEY as g, LINK_CHECK_KEY as _, LINK_KINDS as v, LINK_PRUNE_KEY as y, LOC as b, LibraryProcessingCard as x, MEDIA_REPAIR_KEY as S, MEDIA_REPAIR_URL as C, MEDIA_SOURCES_KEY as w, MEDIA_SOURCE_ICONS as T, Note as E, ORGANIZE_KEY as ee, ORGANIZE_PARAMETER_HINT as te, ORGANIZE_SCOPE_HINT as ne, ORGANIZE_TEXT as D, ORPHAN_RECORDS_KEY as O, ORPHAN_RECORDS_TEXT as re, PERFORMER_DELETE_KEY as k, PLAIN_STAT_STRIP as ie, PlainStat as A, Progress as ae, QUALITY_GOALS_KEY as j, REPAIR_CARD_TEXT as M, REPAIR_LIBRARIES_KEY as oe, RESOURCE_APPLY_KEY as N, RESOURCE_SCAN_KEY as se, RESOURCE_SYNC_TEXT as ce, RESULT_PANEL as P, RESULT_SECTION as F, REVIEW_COUNTS_KEY as I, SOURCE_LABELS as le, SectionHeading as ue, Select as de, SelectItem as fe, SourceMark as pe, StatusLabel as L, TRASH_KEY as R, TaskProgress as z, Wt as me, __toESM as B, apiSend as he, applyConfirmText as ge, applyLeftovers as _e, applyPlanText as ve, applyText as V, attachOrphan as ye, baseName as H, busyProps as U, candidateText as W, checkLine as be, confirmModal as G, cx as xe, deletePerformerVideos as Se, entityDisplayName as Ce, entityFaceImg as we, entityPath as Te, errorMessage as K, esc as Ee, fetchDeletePerformers as De, fetchDeletePlan as Oe, fetchDuplicates as ke, fetchJunkSummary as Ae, fetchLinkCheck as je, fetchLinkPrune as Me, fetchLinkStats as Ne, fetchMediaRepair as Pe, fetchMediaSources as Fe, fetchOrganize as Ie, fetchOrganizeExample as Le, fetchOrphanRecords as Re, fetchQualityGoals as ze, fetchRepairLibraries as Be, fetchResourceApply as Ve, fetchResourceScan as He, fetchReviewCounts as Ue, fetchTrashSummary as We, firstGrapheme as Ge, fmtSize as Ke, hasChanges as qe, hasResourceRoots as Je, junkBreakdown as Ye, missingToolText as Xe, nameFallback as Ze, organizeOutcome as Qe, pickOrganizeFolder as $e, plainStatClass as et, planSummary as tt, previewOrganize as nt, pruneText as rt, purgeCount as it, purgeOrphan as at, queryClient as q, recordsText as ot, rememberTemplates as st, require_jsx_runtime as ct, require_react as lt, reviewSummary as ut, scanLine as dt, shellNavigate as ft, sourceMeta as pt, spriteGlyph as J, startLinkCheck as mt, startLinkPrune as ht, startOrganize as gt, startResourceApply as _t, startResourceScan as vt, statusLine as yt, useAction as bt, useBackgroundJob as Y, useEntityNames as xt, useMutation as St, useQuery as X, withOrganizeJob as Ct } from "./peach-app.js";
 import { Page as wt } from "./peach-app.page-QAncjzM1.js";
 import { ErrorExcerpt as Tt } from "./peach-app.error-excerpt-B8v2xEIP.js";
 import { DataTable as Et } from "./peach-app.data-table-BRJ5A5Cl.js";
@@ -13,7 +13,7 @@ import { LEGACY_AVATAR_IMG as Ot } from "./peach-app.legacy-avatar-NSITxLRS.js";
 import { FolderSearchIcon as kt } from "./peach-app.folder-rows-BWBfTyUD.js";
 import { ConnectionStatus as At } from "./peach-app.connection-status-DI6kgn3i.js";
 // src/react/data-cleanup/cleanup-entry-card.tsx
-var Z = /* @__PURE__ */ he(lt(), 1), Q = ct(), jt = J("chevron-right");
+var Z = /* @__PURE__ */ B(lt(), 1), Q = ct(), jt = J("chevron-right");
 function Mt({ label: e, icon: t, summary: r, detail: i, state: a, attributes: o, onOpen: s }) {
 	return /* @__PURE__ */ (0, Q.jsxs)("button", {
 		type: "button",
@@ -39,7 +39,7 @@ function Mt({ label: e, icon: t, summary: r, detail: i, state: a, attributes: o,
 						children: e
 					}),
 					/* @__PURE__ */ (0, Q.jsx)("span", {
-						className: Ce(n.summary, a === "error" && "text-text-error-primary"),
+						className: xe(n.summary, a === "error" && "text-text-error-primary"),
 						children: r
 					}),
 					i ? /* @__PURE__ */ (0, Q.jsx)("span", {
@@ -56,12 +56,12 @@ function Mt({ label: e, icon: t, summary: r, detail: i, state: a, attributes: o,
 	});
 }
 // src/react/media-repair/media-repair-card.tsx
-var Nt = (e) => w[e] || e, Pt = (e) => q.setQueryData(x, e);
+var Nt = (e) => T[e] || e, Pt = (e) => q.setQueryData(S, e);
 function Ft({ toast: e = () => {} }) {
 	let n = Y({
-		queryKey: x,
-		queryFn: ({ signal: e }) => Ie(e),
-		start: (e) => ge(S, {
+		queryKey: S,
+		queryFn: ({ signal: e }) => Pe(e),
+		start: (e) => he(C, {
 			library: e,
 			restart: !0
 		}),
@@ -70,9 +70,9 @@ function Ft({ toast: e = () => {} }) {
 		}
 	}), r = X({
 		queryKey: oe,
-		queryFn: ({ signal: e }) => He(e)
+		queryFn: ({ signal: e }) => Be(e)
 	}), [i, a] = (0, Z.useState)(""), o = bt(), s = n.job ?? d, c = r.data ?? [], f = s.status === "running", p = c.find((e) => e.id === (f ? s.library : i)) ?? c.find((e) => e.id === s.library) ?? c[0], m = () => {
-		p && U({
+		p && G({
 			title: `修复媒体库「${p.name}」`,
 			body: "缺时间戳表的片子另存一份修好的头，原文件不动；缺索引的片子重建后替换原文件，坏原件改名成同目录的隐藏文件（.文件名.peach-original）留着。" + (p.metered ? "这个库在计费来源上，每修一部都要把片子完整拉一遍。" : ""),
 			confirmLabel: "修复媒体库",
@@ -80,13 +80,13 @@ function Ft({ toast: e = () => {} }) {
 				await n.start.mutateAsync(p.id);
 			}
 		});
-	}, h = () => void o.run("stop", (e) => ge(S, { stop: !0 }, "POST", e), Pt), g = n.outcome, _ = yt(f ? s : g ?? d), v = o.error || g?.error || (n.query.error ? "读不到媒体修复的状态" : "");
+	}, h = () => void o.run("stop", (e) => he(C, { stop: !0 }, "POST", e), Pt), g = n.outcome, _ = yt(f ? s : g ?? d), v = o.error || g?.error || (n.query.error ? "读不到媒体修复的状态" : "");
 	return /* @__PURE__ */ (0, Q.jsxs)("div", {
 		className: "flex flex-col gap-4",
 		children: [/* @__PURE__ */ (0, Q.jsx)(l, {
 			layout: "split",
 			label: "媒体修复",
-			footer: /* @__PURE__ */ (0, Q.jsxs)(Q.Fragment, { children: [/* @__PURE__ */ (0, Q.jsx)(ue, {
+			footer: /* @__PURE__ */ (0, Q.jsxs)(Q.Fragment, { children: [/* @__PURE__ */ (0, Q.jsx)(de, {
 				"aria-label": "媒体库",
 				prefix: "媒体库",
 				className: "w-48",
@@ -95,14 +95,14 @@ function Ft({ toast: e = () => {} }) {
 				onSelectionChange: (e) => {
 					e !== null && a(String(e));
 				},
-				children: c.map((e) => /* @__PURE__ */ (0, Q.jsxs)(de, {
+				children: c.map((e) => /* @__PURE__ */ (0, Q.jsxs)(fe, {
 					id: e.id,
 					textValue: e.name,
-					children: [/* @__PURE__ */ (0, Q.jsx)(fe, { mark: Nt(e.icon) }), e.name]
+					children: [/* @__PURE__ */ (0, Q.jsx)(pe, { mark: Nt(e.icon) }), e.name]
 				}, e.id))
 			}), f ? /* @__PURE__ */ (0, Q.jsx)(t, {
 				onClick: h,
-				...H(o.busy === "stop"),
+				...U(o.busy === "stop"),
 				children: "停止"
 			}) : /* @__PURE__ */ (0, Q.jsx)(t, {
 				onClick: m,
@@ -117,7 +117,7 @@ function Ft({ toast: e = () => {} }) {
 						className: "text-body-2-regular text-text-secondary",
 						children: M
 					}),
-					f && s.total ? /* @__PURE__ */ (0, Q.jsx)(j, {
+					f && s.total ? /* @__PURE__ */ (0, Q.jsx)(ae, {
 						label: "修复进度",
 						value: s.checked,
 						max: s.total
@@ -132,7 +132,7 @@ function Ft({ toast: e = () => {} }) {
 		}), /* @__PURE__ */ (0, Q.jsxs)("div", {
 			"aria-live": "polite",
 			className: "flex flex-col gap-4 empty:hidden",
-			children: [g?.status === "complete" && g.missing_tool ? /* @__PURE__ */ (0, Q.jsx)(T, {
+			children: [g?.status === "complete" && g.missing_tool ? /* @__PURE__ */ (0, Q.jsx)(E, {
 				tone: "warning",
 				title: "缺少 untrunc",
 				action: /* @__PURE__ */ (0, Q.jsx)(t, {
@@ -141,8 +141,8 @@ function Ft({ toast: e = () => {} }) {
 					onClick: n.dismiss,
 					children: "关闭提示"
 				}),
-				children: Ze(g)
-			}) : null, v ? /* @__PURE__ */ (0, Q.jsx)(T, {
+				children: Xe(g)
+			}) : null, v ? /* @__PURE__ */ (0, Q.jsx)(E, {
 				tone: "error",
 				children: v
 			}) : null]
@@ -199,7 +199,7 @@ function Ut({ label: e, value: t, note: n }) {
 }
 function Wt({ title: e, items: t, hint: n, picked: r, onPick: i, children: a, footer: o, confirmed: s = !1 }) {
 	return t.length ? /* @__PURE__ */ (0, Q.jsx)("div", {
-		className: I,
+		className: F,
 		"data-link-results": s ? "gone" : "unclear",
 		children: /* @__PURE__ */ (0, Q.jsx)(Et, {
 			label: e,
@@ -213,13 +213,13 @@ function Wt({ title: e, items: t, hint: n, picked: r, onPick: i, children: a, fo
 					value: (e) => e.entity,
 					render: (e) => /* @__PURE__ */ (0, Q.jsxs)("a", {
 						className: "flex min-w-24 items-center gap-2 text-text-secondary hover:text-text-primary hover:underline",
-						href: e.entity_id && e.entity_kind ? De(e.entity_kind, e.entity, e.entity_id) : void 0,
+						href: e.entity_id && e.entity_kind ? Te(e.entity_kind, e.entity, e.entity_id) : void 0,
 						"data-link-identity": "",
 						children: [/* @__PURE__ */ (0, Q.jsx)("span", {
 							"data-link-avatar": "",
 							className: `relative flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-full bg-background-quaternary-default text-caption-1-medium text-text-primary ${Ot}`,
 							"aria-hidden": !0,
-							dangerouslySetInnerHTML: { __html: `<span>${Oe(qe(e.entity))}</span>` + Ee({
+							dangerouslySetInnerHTML: { __html: `<span>${Ee(Ge(e.entity))}</span>` + we({
 								kind: e.entity_kind,
 								id: e.entity_id,
 								hasImage: e.face?.has_image,
@@ -264,13 +264,13 @@ function Wt({ title: e, items: t, hint: n, picked: r, onPick: i, children: a, fo
 					render: (e) => /* @__PURE__ */ (0, Q.jsx)("div", {
 						className: "min-w-0 w-full",
 						"data-link-result": s ? "gone" : "unclear",
-						children: /^(?:HTTP\s+)?[1-5]\d{2}$/.test(e.note.trim()) ? /* @__PURE__ */ (0, Q.jsx)(pe, {
+						children: /^(?:HTTP\s+)?[1-5]\d{2}$/.test(e.note.trim()) ? /* @__PURE__ */ (0, Q.jsx)(L, {
 							tone: s || /^(?:HTTP\s+)?5\d{2}$/.test(e.note.trim()) ? "error" : "warning",
 							"data-link-code": "",
 							children: e.note.trim()
 						}) : /* @__PURE__ */ (0, Q.jsxs)("div", {
 							className: "flex flex-col items-start gap-1",
-							children: [/* @__PURE__ */ (0, Q.jsx)(pe, {
+							children: [/* @__PURE__ */ (0, Q.jsx)(L, {
 								tone: s ? "error" : "warning",
 								children: s ? "地址已失效" : "未取得结论"
 							}), /* @__PURE__ */ (0, Q.jsx)(Tt, {
@@ -323,10 +323,10 @@ function Wt({ title: e, items: t, hint: n, picked: r, onPick: i, children: a, fo
 function Gt() {
 	let e = X({
 		queryKey: g,
-		queryFn: ({ signal: e }) => Fe(e)
+		queryFn: ({ signal: e }) => Ne(e)
 	}), [n, r] = (0, Z.useState)([]), [i, a] = (0, Z.useState)([]), s = Y({
-		queryKey: ee,
-		queryFn: ({ signal: e }) => Pe(e),
+		queryKey: y,
+		queryFn: ({ signal: e }) => Me(e),
 		start: ht,
 		onFinish: () => {
 			q.invalidateQueries({
@@ -339,7 +339,7 @@ function Gt() {
 		}
 	}), c = Y({
 		queryKey: _,
-		queryFn: ({ signal: e }) => Ne(e),
+		queryFn: ({ signal: e }) => je(e),
 		start: mt,
 		onStarted: () => {
 			s.dismiss(), r([]), a([]);
@@ -348,15 +348,15 @@ function Gt() {
 	(0, Z.useEffect)(() => {
 		r([]), a([]);
 	}, [f]);
-	let p = c.running || c.start.isPending, m = s.running || s.start.isPending, h = d?.status === "complete", y = d?.gone ?? [], b = d?.unclear ?? [], x = h ? b : [], S = y.filter((e) => i.includes(e.id)).map((e) => e.id), C = x.filter((e) => n.includes(e.id)).map((e) => e.id), w = e.data, te = (w?.top_hosts ?? []).slice(0, 3), ne = (e) => {
+	let p = c.running || c.start.isPending, m = s.running || s.start.isPending, h = d?.status === "complete", b = d?.gone ?? [], x = d?.unclear ?? [], S = h ? x : [], C = b.filter((e) => i.includes(e.id)).map((e) => e.id), w = S.filter((e) => n.includes(e.id)).map((e) => e.id), T = e.data, ee = (T?.top_hosts ?? []).slice(0, 3), te = (e) => {
 		p || e && !e.length || c.start.mutate(e ? {
 			retry: e,
 			checkId: f
 		} : {});
-	}, re = (e) => {
-		!m && y.length && U({
+	}, ne = (e) => {
+		!m && b.length && G({
 			title: "删除失效链接",
-			body: `将删除 ${e?.length ?? y.length} 条失效链接。删除前会再次检查，删除后无法恢复。`,
+			body: `将删除 ${e?.length ?? b.length} 条失效链接。删除前会再次检查，删除后无法恢复。`,
 			confirmLabel: "删除失效链接",
 			danger: !0,
 			onConfirm: () => s.start.mutateAsync({
@@ -364,36 +364,36 @@ function Gt() {
 				ids: e
 			})
 		});
-	}, E = s.outcome, D = c.start.error ?? s.start.error, O = null, k = null;
-	if (E?.status === "failed") k = /* @__PURE__ */ (0, Q.jsx)(T, {
+	}, D = s.outcome, O = c.start.error ?? s.start.error, re = null, k = null;
+	if (D?.status === "failed") k = /* @__PURE__ */ (0, Q.jsx)(E, {
 		tone: "error",
 		title: "链接清理未完成",
-		children: E.error || "请查看任务记录，核对已处理的链接。"
+		children: D.error || "请查看任务记录，核对已处理的链接。"
 	});
-	else if (E && !y.length && !b.length) k = /* @__PURE__ */ (0, Q.jsx)(T, {
+	else if (D && !b.length && !x.length) k = /* @__PURE__ */ (0, Q.jsx)(E, {
 		tone: "success",
 		title: "完成",
-		children: rt(E)
+		children: rt(D)
 	});
-	else if (D) k = /* @__PURE__ */ (0, Q.jsx)(T, {
+	else if (O) k = /* @__PURE__ */ (0, Q.jsx)(E, {
 		tone: "error",
 		title: "检查失败",
-		children: W(D)
+		children: K(O)
 	});
-	else if (c.query.isError && d) k = /* @__PURE__ */ (0, Q.jsx)(T, {
+	else if (c.query.isError && d) k = /* @__PURE__ */ (0, Q.jsx)(E, {
 		tone: "neutral",
 		title: "任务状态",
 		children: Vt
 	});
-	else if (d?.status === "failed") k = /* @__PURE__ */ (0, Q.jsx)(T, {
+	else if (d?.status === "failed") k = /* @__PURE__ */ (0, Q.jsx)(E, {
 		tone: "error",
 		title: "检查失败",
 		children: d.error || "检查失败"
 	});
 	else if (d && d.status !== "idle") {
-		O = /* @__PURE__ */ (0, Q.jsxs)(Q.Fragment, { children: [d.status === "running" ? /* @__PURE__ */ (0, Q.jsx)(z, {
+		re = /* @__PURE__ */ (0, Q.jsxs)(Q.Fragment, { children: [d.status === "running" ? /* @__PURE__ */ (0, Q.jsx)(z, {
 			embedded: !0,
-			label: Se(d),
+			label: be(d),
 			value: Math.min(d.checked || 0, d.total || 0),
 			total: d.total
 		}) : null, m ? /* @__PURE__ */ (0, Q.jsx)(z, {
@@ -402,64 +402,64 @@ function Gt() {
 			value: Math.min(s.job?.checked || 0, s.job?.total || 0),
 			total: s.job?.total
 		}) : null] });
-		let e = `立即重试所选（${C.length}）`;
-		k = h || y.length || b.length ? /* @__PURE__ */ (0, Q.jsxs)("div", {
-			className: F,
+		let e = `立即重试所选（${w.length}）`;
+		k = h || b.length || x.length ? /* @__PURE__ */ (0, Q.jsxs)("div", {
+			className: P,
 			children: [
-				E?.status === "complete" ? /* @__PURE__ */ (0, Q.jsx)(T, {
+				D?.status === "complete" ? /* @__PURE__ */ (0, Q.jsx)(E, {
 					tone: "success",
 					title: "完成",
-					children: rt(E)
+					children: rt(D)
 				}) : null,
 				/* @__PURE__ */ (0, Q.jsx)(Wt, {
 					title: "地址已失效",
-					items: y,
+					items: b,
 					hint: Rt,
 					picked: i,
 					onPick: a,
 					confirmed: !0,
-					footer: h && y.length ? /* @__PURE__ */ (0, Q.jsxs)(Q.Fragment, { children: [/* @__PURE__ */ (0, Q.jsx)("p", {
+					footer: h && b.length ? /* @__PURE__ */ (0, Q.jsxs)(Q.Fragment, { children: [/* @__PURE__ */ (0, Q.jsx)("p", {
 						className: "mr-auto min-w-0 text-caption-1-regular text-text-secondary",
 						children: Bt
 					}), /* @__PURE__ */ (0, Q.jsx)(t, {
 						variant: "danger",
-						...H(m),
-						onClick: () => re(),
-						children: `删除 ${y.length} 条失效链接`
+						...U(m),
+						onClick: () => ne(),
+						children: `删除 ${b.length} 条失效链接`
 					})] }) : null,
 					children: /* @__PURE__ */ (0, Q.jsx)(t, {
 						variant: "danger",
 						size: "small",
-						disabled: !h || !S.length,
-						...H(m),
-						onClick: () => re(S),
-						children: `删除所选（${S.length}）`
+						disabled: !h || !C.length,
+						...U(m),
+						onClick: () => ne(C),
+						children: `删除所选（${C.length}）`
 					})
 				}),
 				/* @__PURE__ */ (0, Q.jsx)(Wt, {
 					title: "本次未访问成功",
-					items: b,
+					items: x,
 					hint: zt,
 					picked: n,
 					onPick: r,
-					footer: x.length ? /* @__PURE__ */ (0, Q.jsx)(t, {
+					footer: S.length ? /* @__PURE__ */ (0, Q.jsx)(t, {
 						variant: "primary",
 						leadingIcon: Lt,
-						...H(p),
-						onClick: () => ne(x.map((e) => e.id)),
-						children: `立即重试全部（${x.length}）`
+						...U(p),
+						onClick: () => te(S.map((e) => e.id)),
+						children: `立即重试全部（${S.length}）`
 					}) : null,
-					children: x.length ? /* @__PURE__ */ (0, Q.jsx)(Q.Fragment, { children: /* @__PURE__ */ (0, Q.jsx)(t, {
+					children: S.length ? /* @__PURE__ */ (0, Q.jsx)(Q.Fragment, { children: /* @__PURE__ */ (0, Q.jsx)(t, {
 						variant: "secondary",
 						leadingIcon: Lt,
-						disabled: !C.length,
-						...H(p),
-						onClick: () => ne(C),
+						disabled: !w.length,
+						...U(p),
+						onClick: () => te(w),
 						children: e
 					}) }) : null
 				}),
-				h && !y.length && !b.length ? /* @__PURE__ */ (0, Q.jsx)("p", {
-					className: `${I} text-body-regular text-notification-success-foreground`,
+				h && !b.length && !x.length ? /* @__PURE__ */ (0, Q.jsx)("p", {
+					className: `${F} text-body-regular text-notification-success-foreground`,
 					children: "全部链接均可访问。"
 				}) : null
 			]
@@ -475,8 +475,8 @@ function Gt() {
 			footer: /* @__PURE__ */ (0, Q.jsx)(t, {
 				"data-link-check": "",
 				leadingIcon: It,
-				...H(p),
-				onClick: () => ne(),
+				...U(p),
+				onClick: () => te(),
 				children: p ? "检查中" : h ? "重新检查" : "检查死链"
 			}),
 			children: [
@@ -485,28 +485,28 @@ function Gt() {
 					gap: "small",
 					children: "链接管理"
 				}),
-				e.isError ? /* @__PURE__ */ (0, Q.jsx)(T, {
+				e.isError ? /* @__PURE__ */ (0, Q.jsx)(E, {
 					tone: "error",
 					title: "链接统计读取失败",
-					children: W(e.error)
-				}) : w ? /* @__PURE__ */ (0, Q.jsxs)(Q.Fragment, { children: [/* @__PURE__ */ (0, Q.jsxs)("div", {
+					children: K(e.error)
+				}) : T ? /* @__PURE__ */ (0, Q.jsxs)(Q.Fragment, { children: [/* @__PURE__ */ (0, Q.jsxs)("div", {
 					className: "link-stat-grid mt-4 gap-x-8 gap-y-3",
 					children: [/* @__PURE__ */ (0, Q.jsx)(Ut, {
 						label: "链接总数",
-						value: Ht(w.total),
-						note: `分布在 ${Ht(w.entities)} 个女优、厂牌与系列`
-					}), Object.entries(w.by_kind ?? {}).map(([e, t]) => /* @__PURE__ */ (0, Q.jsx)(Ut, {
+						value: Ht(T.total),
+						note: `分布在 ${Ht(T.entities)} 个女优、厂牌与系列`
+					}), Object.entries(T.by_kind ?? {}).map(([e, t]) => /* @__PURE__ */ (0, Q.jsx)(Ut, {
 						label: v[e] || e,
 						value: Ht(t)
 					}, e))]
-				}), te.length ? /* @__PURE__ */ (0, Q.jsxs)("div", {
+				}), ee.length ? /* @__PURE__ */ (0, Q.jsxs)("div", {
 					className: "mt-4 flex min-w-0 flex-col gap-0.5",
 					children: [/* @__PURE__ */ (0, Q.jsx)("span", {
 						className: "text-caption-1-regular text-text-secondary",
 						children: "主要站点"
 					}), /* @__PURE__ */ (0, Q.jsx)("div", {
 						className: "flex min-w-0 flex-wrap gap-x-5 gap-y-2",
-						children: te.map(([e, t]) => /* @__PURE__ */ (0, Q.jsxs)("span", {
+						children: ee.map(([e, t]) => /* @__PURE__ */ (0, Q.jsxs)("span", {
 							"data-top-host": "",
 							className: "inline-flex min-w-0 max-w-full items-center gap-1.5",
 							children: [/* @__PURE__ */ (0, Q.jsxs)("a", {
@@ -515,7 +515,7 @@ function Gt() {
 								rel: "noopener noreferrer",
 								className: "inline-flex min-w-0 items-center gap-1.5 text-body-2-medium text-text-primary",
 								children: [
-									/* @__PURE__ */ (0, Q.jsx)(Dt, { linkId: w.top_host_link_ids?.[e] }),
+									/* @__PURE__ */ (0, Q.jsx)(Dt, { linkId: T.top_host_link_ids?.[e] }),
 									/* @__PURE__ */ (0, Q.jsx)("span", {
 										className: "min-w-0 wrap-anywhere",
 										children: e
@@ -539,7 +539,7 @@ function Gt() {
 				/* @__PURE__ */ (0, Q.jsx)("div", {
 					"aria-live": "polite",
 					className: "mt-4 flex flex-col gap-3 empty:hidden",
-					children: O
+					children: re
 				})
 			]
 		}), /* @__PURE__ */ (0, Q.jsx)("div", {
@@ -550,7 +550,7 @@ function Gt() {
 	});
 }
 // src/react/data-cleanup/organize-card.tsx
-var Kt = (e, t) => `将整理「${e}」${t ? `的「${t}」及其子目录` : "上的文件名与目录"}，清理特殊符号与乱码，并按已填模板改名或移动。目标已存在的行会整行跳过。这一批可以从「回滚上一批」整批退回。`, qt = "将把上一批整理动过的文件退回整理前的名字与位置，数据库路径跟着退回。退回后这一批不再出现在这里。", Jt = 8;
+var Kt = (e, t, n) => n ? `将按 javorg「${n}」规则整理「${e}」${t ? `的「${t}」及其子目录` : ""}。同番号撞名会加 -1/-2。这一批可以从「回滚上一批」整批退回。` : `将整理「${e}」${t ? `的「${t}」及其子目录` : "上的文件名与目录"}，清理特殊符号与乱码，并按已填模板改名或移动。目标已存在的行会整行跳过。这一批可以从「回滚上一批」整批退回。`, qt = "将把上一批整理动过的文件退回整理前的名字与位置，数据库路径跟着退回。退回后这一批不再出现在这里。", Jt = 8;
 function Yt({ plan: e }) {
 	return /* @__PURE__ */ (0, Q.jsxs)(Q.Fragment, { children: [/* @__PURE__ */ (0, Q.jsx)("ol", {
 		className: "mt-2 flex min-w-0 flex-col gap-1",
@@ -561,7 +561,7 @@ function Yt({ plan: e }) {
 					"data-middle-truncate": !0,
 					title: e.current_path,
 					className: "min-w-0 truncate",
-					children: be(e.current_path)
+					children: H(e.current_path)
 				}),
 				/* @__PURE__ */ (0, Q.jsx)("span", {
 					"aria-hidden": !0,
@@ -571,7 +571,7 @@ function Yt({ plan: e }) {
 					"data-middle-truncate": !0,
 					title: e.target_path,
 					className: "min-w-0 truncate text-text-primary",
-					children: be(e.target_path)
+					children: H(e.target_path)
 				})
 			]
 		}, e.current_path))
@@ -582,96 +582,97 @@ function Yt({ plan: e }) {
 }
 function Xt({ toast: e, failure: n }) {
 	let r = X({
-		queryKey: te,
-		queryFn: ({ signal: e }) => Re(e)
-	}), i = r.data, a = i?.locations ?? [], [o, c] = (0, Z.useState)(""), d = a.some((e) => e.location === o) ? o : a[0]?.location ?? "", p = i?.templates?.[d], [h, g] = (0, Z.useState)(null), _ = h?.location === d ? h : {
-		location: d,
-		file: p?.file ?? "",
-		dir: p?.dir ?? ""
-	}, v = (e) => {
-		g({
-			..._,
+		queryKey: ee,
+		queryFn: ({ signal: e }) => Ie(e)
+	}), i = r.data, a = i?.locations ?? [], [o, c] = (0, Z.useState)(""), [d, p] = (0, Z.useState)(""), h = a.some((e) => e.location === o) ? o : a[0]?.location ?? "", g = i?.templates?.[h], [_, v] = (0, Z.useState)(null), y = _?.location === h ? _ : {
+		location: h,
+		file: g?.file ?? "",
+		dir: g?.dir ?? ""
+	}, x = (e) => {
+		v({
+			...y,
 			...e
-		}), N.reset();
-	}, [ee, b] = (0, Z.useState)({
+		}), P.reset();
+	}, [S, C] = (0, Z.useState)({
 		location: "",
 		path: ""
-	}), x = ee.location === d ? ee.path : "", S = (0, Z.useRef)({
-		location: d,
-		path: x
+	}), w = S.location === h ? S.path : "", O = (0, Z.useRef)({
+		location: h,
+		path: w
 	});
-	S.current = {
-		location: d,
-		path: x
+	O.current = {
+		location: h,
+		path: w
 	};
-	let [C, D] = (0, Z.useState)(null), O = (0, Z.useRef)(null), k = (0, Z.useRef)(null), ie = (0, Z.useRef)(null), A = X({
+	let [re, k] = (0, Z.useState)(null), ie = (0, Z.useRef)(null), A = (0, Z.useRef)(null), ae = (0, Z.useRef)(null), j = X({
 		queryKey: [
 			"organize-example",
-			_.file,
-			_.dir
+			y.file,
+			y.dir
 		],
-		queryFn: ({ signal: e }) => ze(_.file, _.dir, e),
+		queryFn: ({ signal: e }) => Le(y.file, y.dir, e),
 		enabled: !!i
-	}), [j, ae] = (0, Z.useState)("file"), M = (0, Z.useRef)(!1), oe = (0, Z.useRef)(null);
+	}), [M, oe] = (0, Z.useState)("file"), N = (0, Z.useRef)(!1), se = (0, Z.useRef)(null);
 	(0, Z.useLayoutEffect)(() => {
-		let e = oe.current;
+		let e = se.current;
 		if (!e) return;
-		oe.current = null;
-		let t = (e.field === "file" ? O : k).current;
+		se.current = null;
+		let t = (e.field === "file" ? ie : A).current;
 		t?.focus(), t?.setSelectionRange(e.caret, e.caret);
 	});
-	let se = () => ({
-		location: d,
-		path: x.trim(),
-		file_template: _.file.trim(),
-		dir_template: _.dir.trim()
-	}), N = St({
+	let ce = () => ({
+		location: h,
+		path: w.trim(),
+		file_template: y.file.trim(),
+		dir_template: y.dir.trim(),
+		javorg_mode: d
+	}), P = St({
 		mutationFn: nt,
 		onError: (e) => {
-			let t = /整理路径/.test(W(e)) ? "path" : s.test(W(e)) ? "dir" : "file";
-			D(t), (t === "path" ? ie : t === "dir" ? k : O).current?.focus();
+			let t = /整理路径/.test(K(e)) ? "path" : s.test(K(e)) ? "dir" : "file";
+			k(t), (t === "path" ? ae : t === "dir" ? A : ie).current?.focus();
 		}
-	}), P = St({
-		mutationFn: ({ initial: e }) => et(e),
+	}), F = St({
+		mutationFn: ({ initial: e }) => $e(e),
 		onSuccess: (e, t) => {
-			e.path && t.location === S.current.location && t.path === S.current.path && (b({
+			e.path && t.location === O.current.location && t.path === O.current.path && (C({
 				location: t.location,
 				path: e.path
-			}), D(null), N.reset(), ie.current?.focus());
+			}), k(null), P.reset(), ae.current?.focus());
 		}
-	}), F = Y({
-		queryKey: te,
-		queryFn: ({ signal: e }) => Re(e),
+	}), I = Y({
+		queryKey: ee,
+		queryFn: ({ signal: e }) => Ie(e),
 		start: gt,
 		jobOf: (e) => e,
 		withJob: Ct,
-		onStarted: () => N.reset(),
+		onStarted: () => P.reset(),
 		onFinish: (t) => {
 			if (q.invalidateQueries({
-				queryKey: te,
+				queryKey: ee,
 				exact: !0
 			}), t.status !== "complete") return;
-			let { text: r, failed: i } = $e(t);
+			let { text: r, failed: i } = Qe(t);
 			i ? n("整理文件", /* @__PURE__ */ Error(`${i} 行未能处理`)) : e(r.replace(/。$/, ""));
 		}
-	}), I = F.running || F.start.isPending, ce = JSON.stringify(N.variables) === JSON.stringify(se()), L = ce ? N.data : void 0, le = Number(L?.counts?.change || 0), pe = y[d] || d, R = (e) => {
-		v(e), D(null), N.reset();
-	}, me = (e) => {
-		let t = (j === "file" ? O : k).current, n = _[j], r = M.current ? t?.selectionStart ?? n.length : n.length, i = M.current ? t?.selectionEnd ?? r : r, a = `{${e}}`;
-		oe.current = {
-			field: j,
+	}), le = I.running || I.start.isPending, ue = JSON.stringify(P.variables) === JSON.stringify(ce()), L = ue ? P.data : void 0, R = Number(L?.counts?.change || 0), me = b[h] || h, B = (e) => {
+		x(e), k(null), P.reset();
+	}, he = (e) => {
+		let t = (M === "file" ? ie : A).current, n = y[M], r = N.current ? t?.selectionStart ?? n.length : n.length, i = N.current ? t?.selectionEnd ?? r : r, a = `{${e}}`;
+		se.current = {
+			field: M,
 			caret: r + a.length
-		}, R({ [j]: n.slice(0, r) + a + n.slice(i) });
-	}, he = () => {
-		N.isPending || I || !d || (F.dismiss(), F.start.reset(), D(null), N.mutate(se()));
+		}, B({ [M]: n.slice(0, r) + a + n.slice(i) });
 	}, ge = () => {
-		let e = N.variables;
-		e && L && le && U({
+		P.isPending || le || !h || (I.dismiss(), I.start.reset(), k(null), P.mutate(ce()));
+	}, _e = () => {
+		let e = P.variables;
+		e && L && R && G({
 			title: "整理文件",
-			body: Kt(pe, e.path),
+			body: Kt(me, e.path, e.javorg_mode || ""),
 			confirmLabel: "整理文件",
 			onConfirm: async () => {
-				await F.start.mutateAsync({
+				await I.start.mutateAsync({
 					kind: "apply",
 					request: e
 				}), st({
@@ -683,48 +684,48 @@ function Xt({ toast: e, failure: n }) {
 				});
 			}
 		});
-	}, _e = () => void U({
+	}, ve = () => void G({
 		title: "回滚上一批整理",
 		body: qt,
 		confirmLabel: "回滚整理",
-		onConfirm: () => F.start.mutateAsync({ kind: "rollback" })
-	}), B = null, ve = !!le && !I && !F.outcome, V = F.job, ye = F.outcome;
-	if (V?.status === "running") {
-		let e = V.message || V.stage || "正在整理文件";
-		B = /* @__PURE__ */ (0, Q.jsx)(z, {
+		onConfirm: () => I.start.mutateAsync({ kind: "rollback" })
+	}), V = null, ye = !!R && !le && !I.outcome, H = I.job, W = I.outcome;
+	if (H?.status === "running") {
+		let e = H.message || H.stage || "正在整理文件";
+		V = /* @__PURE__ */ (0, Q.jsx)(z, {
 			embedded: !0,
 			label: e,
-			value: Math.min(V.checked || 0, V.total || 0),
-			total: V.total
+			value: Math.min(H.checked || 0, H.total || 0),
+			total: H.total
 		});
-	} else if (ye?.status === "failed") B = /* @__PURE__ */ (0, Q.jsx)(T, {
+	} else if (W?.status === "failed") V = /* @__PURE__ */ (0, Q.jsx)(E, {
 		tone: "error",
 		title: "文件整理未完成",
-		children: ye.error || "请查看任务记录，核对已处理的文件。"
+		children: W.error || "请查看任务记录，核对已处理的文件。"
 	});
-	else if (ye) {
-		let { text: e, failed: t } = $e(ye);
-		B = /* @__PURE__ */ (0, Q.jsx)(T, {
+	else if (W) {
+		let { text: e, failed: t } = Qe(W);
+		V = /* @__PURE__ */ (0, Q.jsx)(E, {
 			tone: t ? "warning" : "success",
 			title: t ? "部分完成" : "整理结果",
 			children: e
 		});
-	} else F.start.isError ? B = /* @__PURE__ */ (0, Q.jsx)(T, {
+	} else I.start.isError ? V = /* @__PURE__ */ (0, Q.jsx)(E, {
 		tone: "error",
 		title: "整理失败",
-		children: W(F.start.error)
-	}) : N.isPending ? B = /* @__PURE__ */ (0, Q.jsx)(z, {
+		children: K(I.start.error)
+	}) : P.isPending ? V = /* @__PURE__ */ (0, Q.jsx)(z, {
 		embedded: !0,
 		label: "正在核对整理计划"
-	}) : N.isError && ce ? B = /* @__PURE__ */ (0, Q.jsx)(T, {
+	}) : P.isError && ue ? V = /* @__PURE__ */ (0, Q.jsx)(E, {
 		tone: "error",
 		title: "整理预览失败",
-		children: W(N.error)
-	}) : L && (B = /* @__PURE__ */ (0, Q.jsxs)(Q.Fragment, { children: [/* @__PURE__ */ (0, Q.jsx)(T, {
+		children: K(P.error)
+	}) : L && (V = /* @__PURE__ */ (0, Q.jsxs)(Q.Fragment, { children: [/* @__PURE__ */ (0, Q.jsx)(E, {
 		tone: "neutral",
 		title: "预览结果",
 		children: tt(L)
-	}), le ? /* @__PURE__ */ (0, Q.jsx)(Yt, { plan: L }) : null] }));
+	}), R ? /* @__PURE__ */ (0, Q.jsx)(Yt, { plan: L }) : null] }));
 	return /* @__PURE__ */ (0, Q.jsxs)(l, {
 		layout: "stack",
 		id: "organize",
@@ -733,20 +734,20 @@ function Xt({ toast: e, failure: n }) {
 		footer: /* @__PURE__ */ (0, Q.jsxs)(Q.Fragment, { children: [
 			i?.last_batch ? /* @__PURE__ */ (0, Q.jsx)(t, {
 				variant: "secondary",
-				...H(I),
-				onClick: _e,
+				...U(le),
+				onClick: ve,
 				children: "回滚上一批"
 			}) : null,
 			/* @__PURE__ */ (0, Q.jsx)(t, {
-				variant: ve ? "secondary" : "primary",
-				disabled: !a.length || I,
-				...H(N.isPending),
-				onClick: he,
+				variant: ye ? "secondary" : "primary",
+				disabled: !a.length || le,
+				...U(P.isPending),
+				onClick: ge,
 				children: "预览"
 			}),
-			ve ? /* @__PURE__ */ (0, Q.jsx)(t, {
+			ye ? /* @__PURE__ */ (0, Q.jsx)(t, {
 				variant: "primary",
-				onClick: ge,
+				onClick: _e,
 				children: "执行整理"
 			}) : null
 		] }),
@@ -758,14 +759,14 @@ function Xt({ toast: e, failure: n }) {
 			}),
 			/* @__PURE__ */ (0, Q.jsx)("p", {
 				className: "text-body-regular text-text-secondary",
-				children: E
+				children: D
 			}),
 			r.isError ? /* @__PURE__ */ (0, Q.jsx)("div", {
 				className: "mt-3",
-				children: /* @__PURE__ */ (0, Q.jsx)(T, {
+				children: /* @__PURE__ */ (0, Q.jsx)(E, {
 					tone: "error",
 					title: "整理配置读取失败",
-					children: W(r.error)
+					children: K(r.error)
 				})
 			}) : null,
 			/* @__PURE__ */ (0, Q.jsxs)("div", {
@@ -774,21 +775,21 @@ function Xt({ toast: e, failure: n }) {
 					/* @__PURE__ */ (0, Q.jsxs)("div", {
 						"data-organize-scope": !0,
 						className: "flex min-w-0 flex-wrap items-start gap-2",
-						children: [a.length ? /* @__PURE__ */ (0, Q.jsx)(ue, {
+						children: [a.length ? /* @__PURE__ */ (0, Q.jsx)(de, {
 							"aria-label": "整理哪个来源",
 							prefix: "来源",
 							className: "w-fit min-w-25",
-							selectedKey: d || null,
+							selectedKey: h || null,
 							onSelectionChange: (e) => {
-								e !== null && (c(String(e)), b({
+								e !== null && (c(String(e)), C({
 									location: String(e),
 									path: ""
-								}), D(null), N.reset(), P.reset(), M.current = !1);
+								}), k(null), P.reset(), F.reset(), N.current = !1);
 							},
-							children: a.map((e) => /* @__PURE__ */ (0, Q.jsxs)(de, {
+							children: a.map((e) => /* @__PURE__ */ (0, Q.jsxs)(fe, {
 								id: e.location,
-								textValue: y[e.location] || e.location,
-								children: [/* @__PURE__ */ (0, Q.jsx)(fe, { mark: w[e.location] || "database" }), y[e.location] || e.location]
+								textValue: b[e.location] || e.location,
+								children: [/* @__PURE__ */ (0, Q.jsx)(pe, { mark: T[e.location] || "database" }), b[e.location] || e.location]
 							}, e.location))
 						}) : null, /* @__PURE__ */ (0, Q.jsxs)("div", {
 							className: "flex min-w-0 basis-64 flex-1 items-start gap-2",
@@ -799,59 +800,100 @@ function Xt({ toast: e, failure: n }) {
 								name: "organize-path",
 								autoComplete: "off",
 								spellCheck: "false",
-								value: x,
-								ref: ie,
-								isInvalid: C === "path",
+								value: w,
+								ref: ae,
+								isInvalid: re === "path",
 								onChange: (e) => {
-									b({
-										location: d,
+									C({
+										location: h,
 										path: e
-									}), D(null), N.reset(), P.reset();
+									}), k(null), P.reset(), F.reset();
 								}
 							}), /* @__PURE__ */ (0, Q.jsx)(f, {
 								icon: kt,
 								"aria-label": "选择整理路径",
-								...H(P.isPending),
-								onClick: () => P.mutate({
-									initial: x || a.find((e) => e.location === d)?.roots[0] || "",
-									location: d,
-									path: x
+								...U(F.isPending),
+								onClick: () => F.mutate({
+									initial: w || a.find((e) => e.location === h)?.roots[0] || "",
+									location: h,
+									path: w
 								})
 							})]
 						})]
 					}),
 					/* @__PURE__ */ (0, Q.jsx)("p", {
 						className: "text-caption-1-regular text-text-secondary",
-						children: re
+						children: ne
 					}),
-					P.isError ? /* @__PURE__ */ (0, Q.jsxs)(T, {
+					F.isError ? /* @__PURE__ */ (0, Q.jsxs)(E, {
 						tone: "error",
 						title: "目录选择失败",
-						children: [W(P.error), "；也可直接输入路径。"]
+						children: [K(F.error), "；也可直接输入路径。"]
+					}) : null,
+					/* @__PURE__ */ (0, Q.jsx)(de, {
+						"aria-label": "整理模式",
+						prefix: "模式",
+						className: "w-fit min-w-40",
+						selectedKey: d || "default",
+						onSelectionChange: (e) => {
+							if (e === null) return;
+							let t = String(e) === "default" ? "" : String(e);
+							p(t), k(null), P.reset();
+							let n = i?.presets?.find((e) => (e.javorg_mode || "") === t);
+							n && B({
+								file: n.file,
+								dir: n.dir
+							});
+						},
+						children: (i?.javorg_modes?.length ? i.javorg_modes : [
+							{
+								id: "",
+								label: "默认模板"
+							},
+							{
+								id: "dvd-back",
+								label: "javorg·dvd-back（→guaxiao1/前缀/番号）"
+							},
+							{
+								id: "guaxiao",
+								label: "javorg·guaxiao（前缀>2才归集）"
+							}
+						]).map((e) => /* @__PURE__ */ (0, Q.jsx)(fe, {
+							id: e.id || "default",
+							textValue: e.label,
+							children: e.label
+						}, e.id || "default"))
+					}),
+					d ? /* @__PURE__ */ (0, Q.jsx)(E, {
+						tone: "neutral",
+						title: "javorg 兼容",
+						children: "预览后确认才会动盘。dvd-back：番号进 guaxiao1/前缀/番号/；杂项树不动。guaxiao：前缀出现大于2才归集；撞名加 -1/-2。"
 					}) : null,
 					/* @__PURE__ */ (0, Q.jsx)(m, {
 						label: "文件名模板",
+						disabled: !!d,
 						placeholder: "{code}[ {title}]",
-						value: _.file,
-						ref: O,
+						value: y.file,
+						ref: ie,
 						spellCheck: "false",
-						isInvalid: C === "file",
+						isInvalid: re === "file",
 						onFocus: () => {
-							ae("file"), M.current = !0;
+							oe("file"), N.current = !0;
 						},
-						onChange: (e) => R({ file: e })
+						onChange: (e) => B({ file: e })
 					}),
 					/* @__PURE__ */ (0, Q.jsx)(m, {
 						label: "目录模板",
 						placeholder: "留空表示原地改名",
-						value: _.dir,
-						ref: k,
+						value: y.dir,
+						ref: A,
 						spellCheck: "false",
-						isInvalid: C === "dir",
+						isInvalid: re === "dir",
+						disabled: !!d,
 						onFocus: () => {
-							ae("dir"), M.current = !0;
+							oe("dir"), N.current = !0;
 						},
-						onChange: (e) => R({ dir: e })
+						onChange: (e) => B({ dir: e })
 					}),
 					i?.presets?.length ? /* @__PURE__ */ (0, Q.jsxs)("div", {
 						className: "flex flex-col gap-2",
@@ -868,10 +910,10 @@ function Xt({ toast: e, failure: n }) {
 								title: e.example || e.label,
 								className: "max-w-full [&>span]:min-w-0 [&>span]:shrink",
 								onClick: () => {
-									R({
+									B({
 										file: e.file,
 										dir: e.dir
-									}), M.current = !1;
+									}), p(e.javorg_mode || ""), N.current = !1, P.reset();
 								},
 								children: /* @__PURE__ */ (0, Q.jsx)("span", {
 									className: "truncate",
@@ -882,12 +924,12 @@ function Xt({ toast: e, failure: n }) {
 					}) : null,
 					/* @__PURE__ */ (0, Q.jsxs)("p", {
 						"aria-live": "polite",
-						"aria-busy": A.isFetching,
+						"aria-busy": j.isFetching,
 						"data-organize-example": "",
 						className: "text-caption-1-regular text-text-secondary",
 						children: ["路径示例：", /* @__PURE__ */ (0, Q.jsx)("code", {
 							className: "wrap-anywhere",
-							children: A.data?.example || A.data?.error || (A.isError ? W(A.error) : "正在预览…")
+							children: j.data?.example || j.data?.error || (j.isError ? K(j.error) : "正在预览…")
 						})]
 					}),
 					i?.placeholders?.length ? /* @__PURE__ */ (0, Q.jsxs)("div", {
@@ -903,7 +945,7 @@ function Xt({ toast: e, failure: n }) {
 									children: "插入参数"
 								}),
 								"（到",
-								j === "file" ? "文件名模板" : "目录模板",
+								M === "file" ? "文件名模板" : "目录模板",
 								"）"
 							]
 						}), /* @__PURE__ */ (0, Q.jsx)("div", {
@@ -912,7 +954,7 @@ function Xt({ toast: e, failure: n }) {
 								variant: "ghost",
 								size: "small",
 								"aria-label": `${e.label} {${e.key}}`,
-								onClick: () => me(e.key),
+								onClick: () => he(e.key),
 								children: /* @__PURE__ */ (0, Q.jsxs)("span", {
 									className: "inline-flex flex-wrap items-center gap-x-1.5",
 									children: [/* @__PURE__ */ (0, Q.jsx)("code", { children: `{${e.key}}` }), /* @__PURE__ */ (0, Q.jsx)("span", {
@@ -925,21 +967,21 @@ function Xt({ toast: e, failure: n }) {
 					}) : null,
 					/* @__PURE__ */ (0, Q.jsx)("p", {
 						className: "text-caption-1-regular leading-4.5 text-text-secondary",
-						children: ne
+						children: te
 					})
 				]
 			}),
 			/* @__PURE__ */ (0, Q.jsx)("div", {
 				"aria-live": "polite",
 				className: "mt-3 flex flex-col gap-2 empty:hidden",
-				children: B
+				children: V
 			})
 		]
 	});
 }
 // src/react/data-cleanup/orphan-records-card.tsx
 var Zt = J("play"), Qt = () => q.invalidateQueries({
-	queryKey: D,
+	queryKey: O,
 	exact: !0
 });
 function $t({ item: e, toast: n }) {
@@ -949,14 +991,14 @@ function $t({ item: e, toast: n }) {
 			let t = e.candidates.find((e) => e.id === r);
 			n(`已将「${e.name}」的个人记录转移到「${t?.name ?? "所选文件"}」`), Qt();
 		},
-		onError: (e) => n(W(e))
+		onError: (e) => n(K(e))
 	}), o = St({
 		mutationFn: () => at(e.id),
 		onSuccess: (t) => {
 			n(t.blocked.length ? `「${e.name}」的文件已恢复，记录未删除；下次扫描后恢复为在库状态` : `已删除「${e.name}」的作品记录及个人记录`), Qt();
 		}
 	}), s = () => {
-		U({
+		G({
 			title: "删除记录",
 			body: `将删除「${e.name}」的作品记录${ot(e.records) ? `及其个人记录（${ot(e.records)}）` : ""}。此操作不可撤销。`,
 			confirmLabel: "删除记录",
@@ -970,11 +1012,11 @@ function $t({ item: e, toast: n }) {
 			/* @__PURE__ */ (0, Q.jsx)(t, {
 				variant: "danger",
 				size: "small",
-				...H(c),
+				...U(c),
 				onClick: s,
 				children: "删除记录"
 			}),
-			e.candidates.length ? /* @__PURE__ */ (0, Q.jsx)(ue, {
+			e.candidates.length ? /* @__PURE__ */ (0, Q.jsx)(de, {
 				"aria-label": `选择接收 ${e.name} 个人记录的文件`,
 				prefix: "接收",
 				className: "w-52",
@@ -982,17 +1024,17 @@ function $t({ item: e, toast: n }) {
 				onSelectionChange: (e) => {
 					e !== null && i(Number(e));
 				},
-				children: e.candidates.map((e) => /* @__PURE__ */ (0, Q.jsx)(de, {
+				children: e.candidates.map((e) => /* @__PURE__ */ (0, Q.jsx)(fe, {
 					id: e.id,
-					textValue: xe(e),
-					children: xe(e)
+					textValue: W(e),
+					children: W(e)
 				}, e.id))
 			}) : null,
 			e.candidates.length ? /* @__PURE__ */ (0, Q.jsx)(t, {
 				variant: "primary",
 				size: "small",
 				disabled: r === null,
-				...H(c),
+				...U(c),
 				onClick: () => a.mutate(),
 				children: "转移记录"
 			}) : null
@@ -1022,21 +1064,21 @@ function en({ item: e }) {
 				children: e.name
 			}), /* @__PURE__ */ (0, Q.jsx)("small", {
 				className: "truncate text-caption-1-regular text-text-secondary",
-				children: [e.code, y[e.location] || e.location].filter(Boolean).join(" · ")
+				children: [e.code, b[e.location] || e.location].filter(Boolean).join(" · ")
 			})]
 		})]
 	});
 }
 function tn({ toast: e }) {
 	let [n, r] = (0, Z.useState)([]), i = X({
-		queryKey: D,
-		queryFn: ({ signal: e }) => Be(e)
+		queryKey: O,
+		queryFn: ({ signal: e }) => Re(e)
 	}), a = i.data?.items ?? [], o = St({
 		mutationFn: (e) => at(e),
 		onSuccess: (t) => {
 			e(`已删除 ${t.purged} 条作品记录及其个人记录${t.blocked.length ? `；${t.blocked.length} 条文件已恢复，记录未删除` : ""}`), r([]), Qt();
 		}
-	}), s = (e) => void U({
+	}), s = (e) => void G({
 		title: "删除所选记录",
 		body: `将删除以下 ${e.length} 条作品记录及其全部个人记录。此操作不可撤销。`,
 		items: e.map((e) => e.name),
@@ -1085,10 +1127,10 @@ function tn({ toast: e }) {
 			children: [/* @__PURE__ */ (0, Q.jsx)(u, {
 				id: "orphan-records-title",
 				children: "文件已丢失的记录"
-			}), /* @__PURE__ */ (0, Q.jsx)(T, {
+			}), /* @__PURE__ */ (0, Q.jsx)(E, {
 				tone: "error",
 				title: "读取文件已丢失的记录失败",
-				children: W(i.error)
+				children: K(i.error)
 			})]
 		}) : /* @__PURE__ */ (0, Q.jsx)(Et, {
 			label: "文件已消失的作品",
@@ -1097,7 +1139,7 @@ function tn({ toast: e }) {
 			title: "文件已丢失的记录",
 			titleId: "orphan-records-title",
 			unit: "条作品",
-			description: O,
+			description: re,
 			rowId: (e) => String(e.id),
 			rowLabel: (e) => e.name,
 			selected: n,
@@ -1106,7 +1148,7 @@ function tn({ toast: e }) {
 				variant: "danger",
 				size: "small",
 				disabled: !e.length,
-				...H(o.isPending),
+				...U(o.isPending),
 				onClick: () => s(e),
 				children: `删除所选记录（${e.length}）`
 			})
@@ -1115,15 +1157,15 @@ function tn({ toast: e }) {
 }
 // src/react/data-cleanup/performer-delete-card.tsx
 function nn({ person: e }) {
-	let t = Te("performer", e.k, e.entity_id), n = Qe("performer", e.k, e.entity_id);
+	let t = Ce("performer", e.k, e.entity_id), n = Ze("performer", e.k, e.entity_id);
 	return /* @__PURE__ */ (0, Q.jsxs)("a", {
-		href: De("performer", e.k, e.entity_id),
+		href: Te("performer", e.k, e.entity_id),
 		title: n || t,
 		className: "flex min-w-0 items-center gap-3 text-text-primary",
 		children: [/* @__PURE__ */ (0, Q.jsx)("span", {
 			"aria-hidden": !0,
-			className: Ce("relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-background-quaternary-default text-caption-1-medium", Ot),
-			dangerouslySetInnerHTML: { __html: `<span>${Oe(qe(t))}</span>` + Ee({
+			className: xe("relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-background-quaternary-default text-caption-1-medium", Ot),
+			dangerouslySetInnerHTML: { __html: `<span>${Ee(Ge(t))}</span>` + we({
 				kind: "performer",
 				id: e.entity_id,
 				hasImage: e.has_image,
@@ -1141,7 +1183,7 @@ function rn({ toast: n }) {
 	xt();
 	let r = X({
 		queryKey: k,
-		queryFn: ({ signal: e }) => ke(e)
+		queryFn: ({ signal: e }) => De(e)
 	}), [i, a] = (0, Z.useState)([]), [o, s] = (0, Z.useState)(""), [c, d] = (0, Z.useState)(!1), [f, m] = (0, Z.useState)(null), [h, g] = (0, Z.useState)(""), _ = (0, Z.useRef)(null);
 	(0, Z.useEffect)(() => () => _.current?.abort(), []);
 	let v = (0, Z.useMemo)(() => [
@@ -1175,29 +1217,29 @@ function rn({ toast: n }) {
 			width: 136,
 			min: 104,
 			value: (e) => e.bytes,
-			render: (e) => G(e.bytes)
+			render: (e) => Ke(e.bytes)
 		}
-	], []), ee = o.toLocaleLowerCase(), y = (r.data?.items || []).filter((e) => !ee || [
+	], []), y = o.toLocaleLowerCase(), b = (r.data?.items || []).filter((e) => !y || [
 		e.k,
-		Te("performer", e.k, e.entity_id),
+		Ce("performer", e.k, e.entity_id),
 		...e.aliases
-	].some((e) => e.toLocaleLowerCase().includes(ee))), b = async (e, t) => {
+	].some((e) => e.toLocaleLowerCase().includes(y))), x = async (e, t) => {
 		if (c) return;
 		d(!0), g("");
 		let r = new AbortController();
 		_.current = r;
 		try {
-			let i = await Ae(e.map((e) => e.entity_id), r.signal);
+			let i = await Oe(e.map((e) => e.entity_id), r.signal);
 			if (r.signal.throwIfAborted(), !i.total) {
 				n("所选女优没有可删除的影片");
 				return;
 			}
-			let a = i.performers.map((e) => Te("performer", e.name, e.id)), o = [...new Set(i.items.map((e) => e.code || e.name || `#${e.id}`))], s = await U({
+			let a = i.performers.map((e) => Ce("performer", e.name, e.id)), o = [...new Set(i.items.map((e) => e.code || e.name || `#${e.id}`))], s = await G({
 				title: "删除所选女优的全部影片",
-				body: `将永久删除 ${a.slice(0, 5).join("、")}${a.length > 5 ? `等 ${a.length} 位女优` : ""} 关联的 ${i.total} 个影片文件（登记大小 ${G(i.bytes)}）。范围包含全部来源和回收站，不受当前搜索、排序或分页影响。文件、影片资料和观看记录将永久删除，无法恢复；女优档案和照片保留。` + (i.shared ? `其中 ${i.shared} 个文件还关联了未勾选的女优，删除后也会从她们的作品中消失。` : "") + `涉及：${o.slice(0, 5).join("、")}${o.length > 5 ? `等 ${o.length} 部作品` : ""}。`,
+				body: `将永久删除 ${a.slice(0, 5).join("、")}${a.length > 5 ? `等 ${a.length} 位女优` : ""} 关联的 ${i.total} 个影片文件（登记大小 ${Ke(i.bytes)}）。范围包含全部来源和回收站，不受当前搜索、排序或分页影响。文件、影片资料和观看记录将永久删除，无法恢复；女优档案和照片保留。` + (i.shared ? `其中 ${i.shared} 个文件还关联了未勾选的女优，删除后也会从她们的作品中消失。` : "") + `涉及：${o.slice(0, 5).join("、")}${o.length > 5 ? `等 ${o.length} 部作品` : ""}。`,
 				confirmLabel: "永久删除影片",
 				danger: !0,
-				onConfirm: () => we(i)
+				onConfirm: () => Se(i)
 			});
 			if (!s.confirmed) return;
 			let c = s.result;
@@ -1209,11 +1251,11 @@ function rn({ toast: n }) {
 				exact: !0
 			})]), n(`已永久删除 ${c.purged} 个影片文件${c.blocked.length ? `，${c.blocked.length} 个未删除` : ""}`);
 		} catch (e) {
-			r.signal.aborted || g(W(e));
+			r.signal.aborted || g(K(e));
 		} finally {
 			r.signal.aborted || d(!1);
 		}
-	}, x = f ? [
+	}, S = f ? [
 		...f.blocked,
 		...f.cleanup_pending,
 		...f.cache_blocked.map((e) => ({
@@ -1232,7 +1274,7 @@ function rn({ toast: n }) {
 				children: [/* @__PURE__ */ (0, Q.jsx)(u, {
 					id: "batch-delete-title",
 					children: "批量删除"
-				}), r.isError ? /* @__PURE__ */ (0, Q.jsx)(T, {
+				}), r.isError ? /* @__PURE__ */ (0, Q.jsx)(E, {
 					tone: "error",
 					title: "读取女优列表失败",
 					action: /* @__PURE__ */ (0, Q.jsx)(t, {
@@ -1241,7 +1283,7 @@ function rn({ toast: n }) {
 						onClick: () => void r.refetch(),
 						children: "重试"
 					}),
-					children: W(r.error)
+					children: K(r.error)
 				}) : /* @__PURE__ */ (0, Q.jsx)("p", {
 					role: "status",
 					className: "text-body-regular text-text-secondary",
@@ -1253,10 +1295,10 @@ function rn({ toast: n }) {
 				titleId: "batch-delete-title",
 				unit: "位女优",
 				description: e,
-				items: y,
+				items: b,
 				columns: v,
 				rowId: (e) => String(e.entity_id),
-				rowLabel: (e) => Te("performer", e.k, e.entity_id),
+				rowLabel: (e) => Ce("performer", e.k, e.entity_id),
 				selected: i,
 				onSelected: a,
 				toolbarActions: /* @__PURE__ */ (0, Q.jsx)(p, {
@@ -1269,29 +1311,29 @@ function rn({ toast: n }) {
 				actions: (e, n) => /* @__PURE__ */ (0, Q.jsx)(t, {
 					variant: "danger",
 					size: "small",
-					...H(c),
-					onClick: () => void b(e, n),
+					...U(c),
+					onClick: () => void x(e, n),
 					children: "删除所选女优影片"
 				})
 			}),
-			h ? /* @__PURE__ */ (0, Q.jsx)(T, {
+			h ? /* @__PURE__ */ (0, Q.jsx)(E, {
 				tone: "error",
 				title: "未能读取删除清单",
 				children: h
 			}) : null,
-			f ? /* @__PURE__ */ (0, Q.jsx)(T, {
-				tone: x.length ? "warning" : "info",
+			f ? /* @__PURE__ */ (0, Q.jsx)(E, {
+				tone: S.length ? "warning" : "info",
 				title: `已永久删除 ${f.purged} 个影片文件`,
-				extra: x.length ? /* @__PURE__ */ (0, Q.jsx)("div", {
+				extra: S.length ? /* @__PURE__ */ (0, Q.jsx)("div", {
 					className: "flex flex-col gap-2 text-body-2-regular wrap-anywhere",
-					children: x.slice(0, 5).map((e, t) => /* @__PURE__ */ (0, Q.jsxs)("p", { children: [
+					children: S.slice(0, 5).map((e, t) => /* @__PURE__ */ (0, Q.jsxs)("p", { children: [
 						e.path,
 						"（",
 						e.reason,
 						"）"
 					] }, t))
 				}) : null,
-				children: x.length ? `${f.blocked.length} 个文件未能删除，馆藏记录仍保留；${f.cleanup_pending.length} 个隔离文件和 ${f.cache_blocked.length} 个缓存文件待清理。` : "所选影片及关联记录已删除，女优档案和照片保留。"
+				children: S.length ? `${f.blocked.length} 个文件未能删除，馆藏记录仍保留；${f.cleanup_pending.length} 个隔离文件和 ${f.cache_blocked.length} 个缓存文件待清理。` : "所选影片及关联记录已删除，女优档案和照片保留。"
 			}) : null
 		]
 	});
@@ -1306,10 +1348,10 @@ function un({ scan: e, partial: t = !1 }) {
 	return /* @__PURE__ */ (0, Q.jsxs)(Q.Fragment, { children: [/* @__PURE__ */ (0, Q.jsx)("div", {
 		className: ln,
 		children: (e.sources ?? []).map((e) => /* @__PURE__ */ (0, Q.jsxs)("article", {
-			className: K(),
+			className: et(),
 			children: [/* @__PURE__ */ (0, Q.jsx)(A, {
-				label: L[e.location] || "媒体来源",
-				mark: /* @__PURE__ */ (0, Q.jsx)(fe, { mark: w[e.location] ?? "database" }),
+				label: le[e.location] || "媒体来源",
+				mark: /* @__PURE__ */ (0, Q.jsx)(pe, { mark: T[e.location] ?? "database" }),
 				aside: /* @__PURE__ */ (0, Q.jsx)(At, {
 					online: e.online,
 					children: e.online ? "可访问" : "离线"
@@ -1319,7 +1361,7 @@ function un({ scan: e, partial: t = !1 }) {
 				wrapMeta: !0
 			}), e.online && e.unreadable > 0 ? /* @__PURE__ */ (0, Q.jsx)("span", {
 				className: "self-start",
-				children: /* @__PURE__ */ (0, Q.jsxs)(pe, {
+				children: /* @__PURE__ */ (0, Q.jsxs)(L, {
 					tone: "warning",
 					children: [$(e.unreadable), " 个目录未读取"]
 				})
@@ -1329,7 +1371,7 @@ function un({ scan: e, partial: t = !1 }) {
 		className: ln,
 		children: [
 			/* @__PURE__ */ (0, Q.jsx)("article", {
-				className: K(),
+				className: et(),
 				children: /* @__PURE__ */ (0, Q.jsx)(A, {
 					label: "待永久删除",
 					figure: `${$(it(e))} 项`,
@@ -1337,7 +1379,7 @@ function un({ scan: e, partial: t = !1 }) {
 				})
 			}),
 			/* @__PURE__ */ (0, Q.jsx)("article", {
-				className: K(),
+				className: et(),
 				children: /* @__PURE__ */ (0, Q.jsx)(A, {
 					label: "将标为已消失",
 					figure: `${$(e.vanish)} 项`,
@@ -1345,7 +1387,7 @@ function un({ scan: e, partial: t = !1 }) {
 				})
 			}),
 			/* @__PURE__ */ (0, Q.jsx)("article", {
-				className: K(),
+				className: et(),
 				children: /* @__PURE__ */ (0, Q.jsx)(A, {
 					label: "空文件夹",
 					figure: `${$(e.empty)} 个`,
@@ -1353,11 +1395,11 @@ function un({ scan: e, partial: t = !1 }) {
 				})
 			}),
 			/* @__PURE__ */ (0, Q.jsx)("article", {
-				className: K(),
+				className: et(),
 				children: /* @__PURE__ */ (0, Q.jsx)(A, {
 					label: "可清理的缓存",
 					figure: `${$(n.files)} 个`,
-					meta: n.files ? G(n.bytes) : ""
+					meta: n.files ? Ke(n.bytes) : ""
 				})
 			})
 		]
@@ -1365,40 +1407,40 @@ function un({ scan: e, partial: t = !1 }) {
 }
 function dn({ toast: e }) {
 	let n = Y({
-		queryKey: se,
-		queryFn: ({ signal: e }) => Ue(e),
+		queryKey: N,
+		queryFn: ({ signal: e }) => Ve(e),
 		start: _t,
 		onFinish: (t) => {
 			if (q.invalidateQueries({
 				queryKey: R,
 				exact: !0
 			}), q.invalidateQueries({
-				queryKey: N,
+				queryKey: se,
 				exact: !0
 			}), t.status !== "complete") return;
-			let { done: n, left: r } = B(t);
+			let { done: n, left: r } = _e(t);
 			r ? e(`已完成 ${$(n)} 项，${$(r)} 项没有处理`, { warning: !0 }) : e("已清理失效条目");
 		}
 	}), r = Y({
-		queryKey: N,
-		queryFn: ({ signal: e }) => We(e),
+		queryKey: se,
+		queryFn: ({ signal: e }) => He(e),
 		start: vt,
 		onStarted: () => n.dismiss()
-	}), i = r.job, a = r.running || r.start.isPending, o = n.running || n.start.isPending, s = i?.status === "complete" || i?.status === "failed", c = a ? "扫描中" : s ? "重新扫描" : "检查文件", d = (e) => void U({
+	}), i = r.job, a = r.running || r.start.isPending, o = n.running || n.start.isPending, s = i?.status === "complete" || i?.status === "failed", c = a ? "扫描中" : s ? "重新扫描" : "检查文件", d = (e) => void G({
 		title: cn,
-		body: _e(e),
+		body: ge(e),
 		confirmLabel: cn,
 		danger: !0,
 		onConfirm: () => n.start.mutateAsync(e.scan_id || "")
 	}), f = n.outcome, p = (e) => {
-		let t = B(e).left > 0;
-		return /* @__PURE__ */ (0, Q.jsx)(T, {
+		let t = _e(e).left > 0;
+		return /* @__PURE__ */ (0, Q.jsx)(E, {
 			tone: t ? "warning" : "success",
 			title: t ? "部分完成" : "清理结果",
-			children: V(e, G)
+			children: V(e, Ke)
 		});
 	}, m = null, h = null;
-	if (f?.status === "failed") h = /* @__PURE__ */ (0, Q.jsx)(T, {
+	if (f?.status === "failed") h = /* @__PURE__ */ (0, Q.jsx)(E, {
 		tone: "error",
 		title: "资源清理未完成",
 		children: f.error || "请查看任务记录，核对已处理的文件。"
@@ -1408,12 +1450,12 @@ function dn({ toast: e }) {
 		embedded: !0,
 		label: n.job?.message || "正在复核并清理失效条目"
 	});
-	else if (r.start.isError) h = /* @__PURE__ */ (0, Q.jsx)(T, {
+	else if (r.start.isError) h = /* @__PURE__ */ (0, Q.jsx)(E, {
 		tone: "error",
 		title: "扫描失败",
-		children: W(r.start.error)
+		children: K(r.start.error)
 	});
-	else if (r.query.isError && i) h = /* @__PURE__ */ (0, Q.jsx)(T, {
+	else if (r.query.isError && i) h = /* @__PURE__ */ (0, Q.jsx)(E, {
 		tone: "neutral",
 		title: "任务状态",
 		children: sn
@@ -1432,24 +1474,24 @@ function dn({ toast: e }) {
 	} else if (i?.status === "failed") h = /* @__PURE__ */ (0, Q.jsxs)(Q.Fragment, { children: [i.sources?.length ? /* @__PURE__ */ (0, Q.jsx)(un, {
 		scan: i,
 		partial: !0
-	}) : null, /* @__PURE__ */ (0, Q.jsx)(T, {
+	}) : null, /* @__PURE__ */ (0, Q.jsx)(E, {
 		tone: "error",
 		title: "扫描失败",
 		children: i.error || "后台扫描失败"
 	})] });
-	else if (i?.status === "complete" && i.applied) h = n.job?.status === "complete" ? p(n.job) : /* @__PURE__ */ (0, Q.jsx)(T, {
+	else if (i?.status === "complete" && i.applied) h = n.job?.status === "complete" ? p(n.job) : /* @__PURE__ */ (0, Q.jsx)(E, {
 		tone: "neutral",
 		title: "清理结果",
 		children: "这次检查的结果已经清理，重新扫描可再核对。"
 	});
 	else if (i?.status === "complete") {
-		let e = Je(i);
-		h = /* @__PURE__ */ (0, Q.jsxs)(Q.Fragment, { children: [/* @__PURE__ */ (0, Q.jsx)(un, { scan: i }), e ? /* @__PURE__ */ (0, Q.jsx)(T, {
+		let e = qe(i);
+		h = /* @__PURE__ */ (0, Q.jsxs)(Q.Fragment, { children: [/* @__PURE__ */ (0, Q.jsx)(un, { scan: i }), e ? /* @__PURE__ */ (0, Q.jsx)(E, {
 			tone: "neutral",
 			title: "清理内容",
 			action: /* @__PURE__ */ (0, Q.jsx)(t, {
 				variant: "danger",
-				...H(o),
+				...U(o),
 				onClick: () => d(i),
 				children: o ? "正在复核并清理…" : cn
 			}),
@@ -1459,10 +1501,10 @@ function dn({ toast: e }) {
 			children: "已检查可访问的来源，没有待清理的记录、空文件夹或缓存。"
 		})] });
 	}
-	return n.start.isError && !f && (h = /* @__PURE__ */ (0, Q.jsxs)(Q.Fragment, { children: [h, /* @__PURE__ */ (0, Q.jsx)(T, {
+	return n.start.isError && !f && (h = /* @__PURE__ */ (0, Q.jsxs)(Q.Fragment, { children: [h, /* @__PURE__ */ (0, Q.jsx)(E, {
 		tone: "error",
 		title: "清理失败",
-		children: W(n.start.error)
+		children: K(n.start.error)
 	})] })), /* @__PURE__ */ (0, Q.jsxs)("section", {
 		id: "resource-sync",
 		"aria-labelledby": "resource-sync-title",
@@ -1473,7 +1515,7 @@ function dn({ toast: e }) {
 			footer: /* @__PURE__ */ (0, Q.jsx)(t, {
 				"data-resource-scan": !0,
 				leadingIcon: s && !a ? on : an,
-				...H(a),
+				...U(a),
 				onClick: () => {
 					a || r.start.mutate();
 				},
@@ -1487,7 +1529,7 @@ function dn({ toast: e }) {
 				}),
 				/* @__PURE__ */ (0, Q.jsx)("p", {
 					className: "max-w-190 text-body-2-regular leading-5 text-text-secondary",
-					children: P
+					children: ce
 				}),
 				/* @__PURE__ */ (0, Q.jsx)("div", {
 					"aria-live": "polite",
@@ -1505,17 +1547,17 @@ function dn({ toast: e }) {
 // src/react/data-cleanup/data-cleanup-tool-page.tsx
 function fn({ toast: e }) {
 	let t = X({
-		queryKey: C,
-		queryFn: ({ signal: e }) => Le(e)
+		queryKey: w,
+		queryFn: ({ signal: e }) => Fe(e)
 	});
-	return t.isError ? /* @__PURE__ */ (0, Q.jsx)(T, {
+	return t.isError ? /* @__PURE__ */ (0, Q.jsx)(E, {
 		tone: "error",
 		title: "读取媒体来源失败",
-		children: W(t.error)
+		children: K(t.error)
 	}) : t.isPending ? /* @__PURE__ */ (0, Q.jsx)("p", {
 		role: "status",
 		children: "正在读取媒体来源…"
-	}) : Ye(t.data) ? /* @__PURE__ */ (0, Q.jsx)(dn, { toast: e }) : /* @__PURE__ */ (0, Q.jsxs)(l, {
+	}) : Je(t.data) ? /* @__PURE__ */ (0, Q.jsx)(dn, { toast: e }) : /* @__PURE__ */ (0, Q.jsxs)(l, {
 		layout: "stack",
 		label: "资源同步",
 		children: [
@@ -1570,7 +1612,7 @@ function mn(e, t) {
 function hn({ section: e, label: t, icon: n, value: r, open: i }) {
 	return /* @__PURE__ */ (0, Q.jsx)("button", {
 		type: "button",
-		className: K({ interactive: !0 }),
+		className: et({ interactive: !0 }),
 		"data-cleanup-go": e,
 		"data-entry-state": r.state,
 		"aria-busy": r.state === "loading" || void 0,
@@ -1595,8 +1637,8 @@ function gn({ tool: e, navigate: t }) {
 }
 var _n = J("square-check-big"), vn = J("sparkles"), yn = J("file-stack"), bn = J("file-archive"), xn = J("trash"), Sn = () => {
 	for (let e of [
-		ce,
-		ae,
+		I,
+		j,
 		c,
 		h
 	]) q.invalidateQueries({
@@ -1606,20 +1648,20 @@ var _n = J("square-check-big"), vn = J("sparkles"), yn = J("file-stack"), bn = J
 };
 function Cn({ toast: e, open: t, navigate: n }) {
 	let o = X({
-		queryKey: ce,
-		queryFn: ({ signal: e }) => Ge(e)
+		queryKey: I,
+		queryFn: ({ signal: e }) => Ue(e)
 	}), s = X({
-		queryKey: ae,
-		queryFn: ({ signal: e }) => Ve(e)
+		queryKey: j,
+		queryFn: ({ signal: e }) => ze(e)
 	}), l = X({
 		queryKey: c,
-		queryFn: ({ signal: e }) => je(e)
+		queryFn: ({ signal: e }) => ke(e)
 	}), u = X({
 		queryKey: h,
-		queryFn: ({ signal: e }) => Me(e)
+		queryFn: ({ signal: e }) => Ae(e)
 	}), d = X({
 		queryKey: R,
-		queryFn: ({ signal: e }) => Ke(e)
+		queryFn: ({ signal: e }) => We(e)
 	});
 	return (0, Z.useEffect)(() => {
 		let e = i[location.hash];
@@ -1628,7 +1670,7 @@ function Cn({ toast: e, open: t, navigate: n }) {
 		/* @__PURE__ */ (0, Q.jsxs)("section", {
 			"aria-labelledby": "cleanup-pending",
 			className: "flex flex-col gap-4",
-			children: [/* @__PURE__ */ (0, Q.jsx)(le, {
+			children: [/* @__PURE__ */ (0, Q.jsx)(ue, {
 				id: "cleanup-pending",
 				children: "待处理事项"
 			}), /* @__PURE__ */ (0, Q.jsxs)("div", {
@@ -1648,7 +1690,7 @@ function Cn({ toast: e, open: t, navigate: n }) {
 						open: t,
 						value: mn(l, (e) => Number(e.total || 0) ? {
 							figure: `${Number(e.total).toLocaleString()} 组 · ${Number(e.files || 0).toLocaleString()} 个文件`,
-							meta: `可回收 ${G(e.reclaimable || 0)}`
+							meta: `可回收 ${Ke(e.reclaimable || 0)}`
 						} : { figure: "没有重复内容" })
 					}),
 					/* @__PURE__ */ (0, Q.jsx)(hn, {
@@ -1658,7 +1700,7 @@ function Cn({ toast: e, open: t, navigate: n }) {
 						open: t,
 						value: mn(u, (e) => ({
 							figure: `${Number(e.pending_total || 0).toLocaleString()} 个待判断`,
-							meta: Xe(e)
+							meta: Ye(e)
 						}))
 					}),
 					/* @__PURE__ */ (0, Q.jsx)(hn, {
@@ -1675,7 +1717,7 @@ function Cn({ toast: e, open: t, navigate: n }) {
 						open: t,
 						value: mn(d, (e) => ({
 							figure: `${Number(e.total || 0).toLocaleString()} 项在回收站`,
-							meta: e.total ? `占用 ${G(e.bytes || 0)}` : "查看和还原已移入回收站的内容"
+							meta: e.total ? `占用 ${Ke(e.bytes || 0)}` : "查看和还原已移入回收站的内容"
 						}))
 					})
 				]
@@ -1684,7 +1726,7 @@ function Cn({ toast: e, open: t, navigate: n }) {
 		/* @__PURE__ */ (0, Q.jsx)("div", {
 			id: "libraryProcessing",
 			className: "scroll-mt-20",
-			children: /* @__PURE__ */ (0, Q.jsx)(b, {
+			children: /* @__PURE__ */ (0, Q.jsx)(x, {
 				toast: (t) => e(t),
 				monitor: !0,
 				onComplete: Sn
@@ -1693,7 +1735,7 @@ function Cn({ toast: e, open: t, navigate: n }) {
 		/* @__PURE__ */ (0, Q.jsxs)("section", {
 			"aria-labelledby": "cleanup-maintenance",
 			className: "flex flex-col gap-4",
-			children: [/* @__PURE__ */ (0, Q.jsx)(le, {
+			children: [/* @__PURE__ */ (0, Q.jsx)(ue, {
 				id: "cleanup-maintenance",
 				children: "整理与维护"
 			}), /* @__PURE__ */ (0, Q.jsx)("div", {
@@ -1707,7 +1749,7 @@ function Cn({ toast: e, open: t, navigate: n }) {
 		/* @__PURE__ */ (0, Q.jsxs)("section", {
 			"aria-labelledby": "cleanup-deletion",
 			className: "flex flex-col gap-4",
-			children: [/* @__PURE__ */ (0, Q.jsx)(le, {
+			children: [/* @__PURE__ */ (0, Q.jsx)(ue, {
 				id: "cleanup-deletion",
 				children: "清理与删除"
 			}), /* @__PURE__ */ (0, Q.jsx)("div", {
@@ -1722,4 +1764,4 @@ function Cn({ toast: e, open: t, navigate: n }) {
 }
 export { Cn as DataCleanupPage, pn as DataCleanupToolPage };
 
-//# debugId=f068ff37-58fc-4e58-9bdb-bacd1069d40a
+//# debugId=c60085da-4641-4b24-9a9d-080aaab4d755

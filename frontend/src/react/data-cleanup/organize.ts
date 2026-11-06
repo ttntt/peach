@@ -38,11 +38,37 @@ export interface OrganizeJob {
   error?: string;
 }
 
+export interface OrganizeRules {
+  output_root: string;
+  skip_dirs: string[];
+  only_dirs: string[];
+  prefix_min_count: number;
+  collision: 'skip' | 'suffix' | string;
+}
+
+export interface OrganizePreset extends OrganizeTemplate {
+  label: string;
+  example?: string;
+  javorg_mode?: string;
+  output_root?: string;
+  skip_dirs?: string[];
+  only_dirs?: string[];
+  prefix_min_count?: number;
+  collision?: string;
+}
+
 export interface OrganizeData extends OrganizeJob {
   locations: { location: string; roots: string[] }[];
   templates: Record<string, OrganizeTemplate>;
-  presets: ({ label: string; example?: string } & OrganizeTemplate)[];
+  presets: OrganizePreset[];
   placeholders: { key: string; label: string }[];
+  javorg_modes: { id: string; label: string }[];
+  organize_rules?: {
+    defaults: OrganizeRules;
+    collisions: { id: string; label: string }[];
+    preset_rules: Record<string, OrganizeRules>;
+    skip_dirs_dvd_back: string[];
+  };
   last_batch: string;
 }
 
@@ -58,7 +84,7 @@ export interface OrganizePlan {
 }
 
 /** 这一次要整理什么：来源与两份模板。 */
-export interface OrganizeRequest { location: string; file_template: string; dir_template: string; path: string }
+export interface OrganizeRequest { location: string; file_template: string; dir_template: string; path: string; javorg_mode?: string; output_root?: string; skip_dirs?: string[]; only_dirs?: string[]; prefix_min_count?: number; collision?: string }
 
 /** 执行还是回滚。两条都起同一个后台任务，结果落在同一格里。 */
 export type OrganizeCommand = { kind: 'apply'; request: OrganizeRequest } | { kind: 'rollback' };

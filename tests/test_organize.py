@@ -19,7 +19,7 @@ ROOT_DECLARATION = "R:\\media"
 DECLARED = {"local": (ROOT_DECLARATION,)}
 
 VALUES = {
-    "code": "ABC-123", "title": "标题", "studio": "厂牌", "series": "系列",
+    "code": "ABC-123", "prefix": "ABC", "title": "标题", "studio": "厂牌", "series": "系列",
     "year": "2024", "actors": "甲、乙", "cd": "2", "mosaic": "无码",
     "definition": "1080p",
 }

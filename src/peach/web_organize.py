@@ -12,7 +12,7 @@ import sqlite3
 import time
 from pathlib import Path
 
-from . import junk, ledger_backups, organize
+from . import junk, ledger_backups, organize, organize_javorg
 from .media_sources import SCANNABLE_LOCATIONS
 from .organize_templates import PLACEHOLDERS, TemplateError, example_path, validate_template
 from .platform import location_roots
@@ -52,6 +52,12 @@ def q_organize(contract, _args=None) -> dict:
         "templates": organize_templates(contract),
         "presets": [dict(preset) for preset in organize.PRESETS],
         "placeholders": [{"key": key, "label": label} for key, label in PLACEHOLDERS.items()],
+        "organize_rules": organize_javorg.rules_public_meta(),
+        "javorg_modes": [
+            {"id": "", "label": "默认模板"},
+            {"id": "dvd-back", "label": "javorg·dvd-back"},
+            {"id": "guaxiao", "label": "javorg·guaxiao"},
+        ],
         "last_batch": latest.name if latest else "",
     }
 
@@ -62,20 +68,30 @@ def q_organize_example(_contract, args=None) -> dict:
     return example_path(str(args.get("file_template") or ""), str(args.get("dir_template") or ""))
 
 
+
+def _rules_from_body(body) -> organize_javorg.OrganizeRules:
+    """从请求体取出可配置规则；显式字段优先，javorg_mode 仅作预设展开。"""
+    keys = ("output_root", "skip_dirs", "only_dirs", "prefix_min_count", "collision")
+    payload = {key: body[key] for key in keys if key in body}
+    return organize_javorg.parse_rules(payload, javorg_mode=body.get("javorg_mode"))
+
+
 def w_organize_preview(contract, body) -> dict:
     """出计划：写一份 CSV，回给界面会变的行（上限 200）与跳过统计。"""
     location, file_template, dir_template = _templates(contract, body)
+    rules = _rules_from_body(body)
     path_scope = organize.scope_path(location, body.get('path', ''))
     with contract.read_connection() as connection:
         plan = organize.build_plan(connection, location=location,
                                    file_template=file_template, dir_template=dir_template,
-                                   path=path_scope)
+                                   path=path_scope, rules=rules)
     path = organize.plan_path(contract.candidate_root, location)
     organize.write_plan(path, plan["rows"])
     changes = [row for row in plan["rows"] if row["action"] != "skip"]
     return {"ok": True, "location": location, "path": path_scope, "counts": plan["counts"],
             "reasons": plan["reasons"], "rows": changes[:200],
-            "truncated": len(changes) > 200, "plan_csv": str(path)}
+            "truncated": len(changes) > 200, "plan_csv": str(path),
+            "rules": rules.as_dict()}
 
 
 def _run_write(contract, job_id: str, work) -> dict:
@@ -112,6 +128,7 @@ def w_organize_apply(contract, body) -> dict:
     if body.get("confirm") is not True:
         raise ValueError("整理需要确认")
     location, file_template, dir_template = _templates(contract, body)
+    rules = _rules_from_body(body)
     path_scope = organize.scope_path(location, body.get('path', ''))
     if organize.unverified_location(location):
         raise ValueError(f"{location} 挂载上的改名无法核验云端结果，界面只出预览，不执行")
@@ -127,7 +144,8 @@ def w_organize_apply(contract, body) -> dict:
             with contract.read_connection() as connection:
                 plan = organize.build_plan(connection, location=location,
                                            file_template=file_template,
-                                           dir_template=dir_template, path=path_scope)
+                                           dir_template=dir_template, path=path_scope,
+                                           rules=rules)
             if not job.checkpoint(job_id, plan=plan, batch_stamp=batch_stamp):
                 raise InterruptedError('整理已停止')
         job.update(job_id, total=plan["counts"]["change"], stage="正在整理")
@@ -141,7 +159,8 @@ def w_organize_apply(contract, body) -> dict:
     started = job.start(work, restart=True,
                      initial={"stage": "正在核对计划", "location": location, 'path': path_scope},
                      recovery={'confirm': True, 'location': location, 'file_template': file_template,
-                               'dir_template': dir_template, 'path': path_scope, 'action': 'apply'})
+                               'dir_template': dir_template, 'path': path_scope,
+                               **rules.as_dict(), 'action': 'apply'})
     return {key: value for key, value in started.items() if key not in ('plan', 'batch_stamp')}
 
 

@@ -21,7 +21,10 @@ from collections.abc import Callable, Iterable, Sequence
 from contextlib import contextmanager
 from pathlib import Path, PureWindowsPath
 
-from .catalog_rules import is_jav_code, is_uncensored_release, normalise_code_key, part_marker
+from .catalog_rules import (
+    code_letter_stem, is_jav_code, is_uncensored_release, normalise_code_key, part_marker,
+)
+from . import organize_javorg
 from .jobs import ACTIVE_ASSET_SQL
 from .organize_templates import MAX_PATH, TemplateError, clean_filename, render, validate_template
 from .platform import (is_windows_path, location_mounts, location_roots, resolve_root, root_online,
@@ -33,7 +36,7 @@ from .fsutil import atomic_write_text
 PLAN_FIELDS = ["asset_id", "location", "current_path", "target_path", "action", "reason"]
 
 #: 文件名与目录组合，以及使用示例字段时的完整路径。
-PRESETS: tuple[dict[str, str], ...] = (
+PRESETS: tuple[dict, ...] = (
     {"label": "仅番号", "file": "{code}", "dir": "", "example": "ABC-123.mp4"},
     {"label": "番号和标题", "file": "{code}[ {title}]", "dir": "", "example": "ABC-123 标题.mp4"},
     {"label": "番号和画质", "file": "{code}[ {definition}]", "dir": "", "example": "ABC-123 1080p.mp4"},
@@ -43,6 +46,14 @@ PRESETS: tuple[dict[str, str], ...] = (
     {"label": "按出演者建文件夹", "file": "{code}[ {title}]", "dir": "{actors}", "example": "甲、乙/ABC-123 标题.mp4"},
     {"label": "按发行年建文件夹", "file": "{code}[ {title}]", "dir": "{year}", "example": "2024/ABC-123 标题.mp4"},
     {"label": "厂牌下按番号建文件夹", "file": "{code}[ {title}][ CD{cd}]", "dir": "{studio}/{code}", "example": "厂牌/ABC-123/ABC-123 标题 CD2.mp4"},
+    {"label": "javorg·dvd-back", "file": "{code}", "dir": "{prefix}/{code}",
+     "example": "ABC/ABC-123/ABC-123.mp4", "javorg_mode": "dvd-back",
+     "output_root": "guaxiao1", "skip_dirs": list(organize_javorg.SKIP_ENTIRE_TOP),
+     "only_dirs": [], "prefix_min_count": 0, "collision": "suffix"},
+    {"label": "javorg·guaxiao", "file": "{code}", "dir": "{prefix}/{code}",
+     "example": "ABC/ABC-123/ABC-123.mp4", "javorg_mode": "guaxiao",
+     "output_root": "", "skip_dirs": ["guaxiao1"], "only_dirs": [],
+     "prefix_min_count": 2, "collision": "suffix"},
 )
 
 #: 跳过原因的固定写法。界面按这几个键分组计数，所以它们是契约的一部分。
@@ -52,6 +63,10 @@ SKIP_OUTSIDE_ROOT = "不在来源根内"
 SKIP_TARGET_EXISTS = "目标已存在"
 SKIP_CROSS_VOLUME = "跨盘"
 SKIP_TOO_LONG = "路径过长"
+SKIP_MISC_TREE = organize_javorg.SKIP_MISC_TREE
+SKIP_ONLY_DIRS = organize_javorg.SKIP_ONLY_DIRS
+SKIP_PREFIX_RARE = organize_javorg.SKIP_PREFIX_RARE
+SKIP_NO_CODE = organize_javorg.SKIP_NO_CODE
 
 
 #: 挂载上的 `os.rename` 证明不了云端真的改了名的来源：PikPak 挂载对大文件常报 WinError 50，
@@ -133,8 +148,16 @@ def placeholder_values(row, performers: Sequence[str] = ()) -> dict[str, str]:
     title = str(row["catalog_title"] or "") or str(row["original_title"] or "")
     release_date = str(row["release_date"] or "")
     marker = part_marker(name)
+    normalised = normalise_code_key(code) if is_jav_code(code) else code.strip()
+    prefix = ""
+    if normalised.upper().startswith("FC2"):
+        prefix = "FC2"
+    else:
+        stem = code_letter_stem(normalised)
+        prefix = stem.upper() if stem else ""
     return {
-        "code": normalise_code_key(code) if is_jav_code(code) else code.strip(),
+        "code": normalised,
+        "prefix": prefix,
         "title": title.strip(),
         "studio": str(row["studio"] or "").strip(),
         "series": str(row["series"] or "").strip(),
@@ -217,15 +240,13 @@ def scope_path(location: str, path: str = '', roots=None) -> str:
 def build_plan(connection: sqlite3.Connection, *, location: str,
                file_template: str = "", dir_template: str = "",
                roots=None, online: bool | None = None,
-               asset_ids: Sequence[int] | None = None, path: str = '') -> dict:
+               asset_ids: Sequence[int] | None = None, path: str = '',
+               javorg_mode: str = "", rules=None) -> dict:
     """按目录范围与可选模板生成逐文件整理计划。
 
-    返回 `{"rows": [...], "counts": {...}}`：`rows` 只含会变的行与被跳过的行，
-    已经就是目标名字的行只进 `counts["unchanged"]`——几万行原样列出来，用户要找的
-    那几百行反而看不见了。
-
-    存在性只用挂载判定（`root_online`），不逐行 `stat`：115 与 PikPak 的挂载上那是
-    一次网络往返。撞名在执行那一步 `rename` 之前当场判（ADR-0039）。
+    `rules` 为附加可配置规则（输出根、跳过/白名单、前缀门槛、撞名）。
+    未显式传入时可用 `javorg_mode` 展开为预设；真正逻辑只读规则字段。
+    全部默认时行为与上游 ADR-0039 一致。
     """
     file_template = validate_template(file_template)
     dir_template = validate_template(dir_template, directory=True)
@@ -235,6 +256,8 @@ def build_plan(connection: sqlite3.Connection, *, location: str,
     if selected_path:
         selected = PureWindowsPath(selected_path)
         rows = [row for row in rows if PureWindowsPath(row['path']).is_relative_to(selected)]
+    parsed = (rules if isinstance(rules, organize_javorg.OrganizeRules)
+              else organize_javorg.parse_rules(rules, javorg_mode=javorg_mode))
     counts: dict[str, int] = {"total": len(rows), "unchanged": 0, "change": 0, "skip": 0}
     reasons: dict[str, int] = {}
     plan: list[dict] = []
@@ -255,11 +278,13 @@ def build_plan(connection: sqlite3.Connection, *, location: str,
             skip(row, SKIP_OFFLINE)
         return {"rows": plan, "counts": counts, "reasons": reasons}
 
-    performers = _performers(connection, location)
-    # 目标撞名先按账本已知的路径判一遍：同一批里两行算出同一个名字，或者目标位置上
-    # 已经躺着另一条记录，都在预览里就说清楚，而不是等执行到一半才报一行失败。
     claimed = {str(path).casefold(): int(aid) for aid, path in connection.execute(
         'SELECT id,path FROM asset WHERE location=? AND path IS NOT NULL', (location,))}
+    performers = _performers(connection, location)
+    prefix_counts = (organize_javorg.prefix_counts_for(rows)
+                     if parsed.prefix_min_count > 0 else None)
+    use_suffix = parsed.collision == organize_javorg.COLLISION_SUFFIX
+    enrich = parsed.active
 
     for row in rows:
         path = str(row["path"])
@@ -271,8 +296,35 @@ def build_plan(connection: sqlite3.Connection, *, location: str,
         if root_states is not None and not root_states[index]:
             skip(row, SKIP_OFFLINE)
             continue
+        if organize_javorg.under_named_tops(root, path, parsed.skip_dirs):
+            # 已在「若整理会落到的位置」则算 unchanged，避免把已归集的 guaxiao1 树报成跳过。
+            values_probe = placeholder_values(row, performers.get(int(row["id"]), []))
+            if enrich:
+                values_probe = organize_javorg.enrich_values(values_probe, row)
+            base_probe = organize_javorg.resolve_output_base(root, selected_path, parsed.output_root)
+            dest_probe = base_probe
+            if dir_template:
+                rendered_probe, absent_probe = render(dir_template, values_probe, directory=True)
+                if rendered_probe and not absent_probe:
+                    dest_probe = ntpath.join(base_probe, *rendered_probe.split("/"))
+            if organize_javorg.already_at_dest(path, dest_probe):
+                counts["unchanged"] += 1
+                continue
+            skip(row, SKIP_MISC_TREE)
+            continue
+        if not organize_javorg.top_allowed(root, path, parsed.only_dirs):
+            skip(row, SKIP_ONLY_DIRS)
+            continue
         values = placeholder_values(row, performers.get(int(row["id"]), []))
+        if enrich:
+            values = organize_javorg.enrich_values(values, row)
+        if prefix_counts is not None:
+            prefix = values.get("prefix") or ""
+            if not prefix or prefix_counts[prefix.casefold()] <= parsed.prefix_min_count:
+                skip(row, SKIP_PREFIX_RARE)
+                continue
         current_dir = ntpath.dirname(path)
+        base = organize_javorg.resolve_output_base(root, selected_path, parsed.output_root)
         target_dir = current_dir
         missing: set[str] = set()
         if dir_template:
@@ -281,7 +333,9 @@ def build_plan(connection: sqlite3.Connection, *, location: str,
             if not rendered:
                 skip(row, SKIP_MISSING_FIELD)
                 continue
-            target_dir = ntpath.join(selected_path or root, *rendered.split("/"))
+            target_dir = ntpath.join(base, *rendered.split("/"))
+        elif parsed.output_root:
+            target_dir = base
         name = str(row["name"] or ntpath.basename(path))
         target_name = clean_filename(name)
         if file_template:
@@ -295,7 +349,7 @@ def build_plan(connection: sqlite3.Connection, *, location: str,
             skip(row, SKIP_MISSING_FIELD)
             continue
         target = ntpath.join(target_dir, target_name)
-        if target == path:
+        if target.casefold() == path.casefold():
             counts["unchanged"] += 1
             continue
         if ntpath.splitdrive(target)[0].casefold() != ntpath.splitdrive(path)[0].casefold():
@@ -304,18 +358,28 @@ def build_plan(connection: sqlite3.Connection, *, location: str,
         if len(target) > MAX_PATH:
             skip(row, SKIP_TOO_LONG, target)
             continue
-        occupant = claimed.get(target.casefold())
-        if occupant is not None and occupant != int(row["id"]):
-            skip(row, SKIP_TARGET_EXISTS, target)
-            continue
+        if use_suffix:
+            target = organize_javorg.unique_path(target, claimed, int(row["id"]))
+            if target.casefold() == path.casefold():
+                counts["unchanged"] += 1
+                continue
+        else:
+            occupant = claimed.get(target.casefold())
+            if occupant is not None and occupant != int(row["id"]):
+                skip(row, SKIP_TARGET_EXISTS, target)
+                continue
         claimed.pop(path.casefold(), None)
         claimed[target.casefold()] = int(row["id"])
         counts["change"] += 1
-        plan.append({
+        entry = {
             "asset_id": row["id"], "location": location, "current_path": path,
             "target_path": target,
-            "action": "rename" if target_dir == current_dir else "move", "reason": "",
-        })
+            "action": "rename" if target_dir.casefold() == current_dir.casefold() else "move",
+            "reason": "",
+        }
+        if use_suffix:
+            entry["allow_suffix"] = True
+        plan.append(entry)
     return {"rows": plan, "counts": counts, "reasons": reasons}
 
 
@@ -449,6 +513,17 @@ def apply_plan(connection: sqlite3.Connection, rows: Sequence[dict], *,
                 outcome = '资产已不在馆藏，未执行整理'
             else:
                 outcome = 'ok' if landed else _move_one(connection, int(row["asset_id"]), old_path, new_path)
+                if (outcome == SKIP_TARGET_EXISTS and row.get("allow_suffix")
+                        and not landed):
+                    candidate = new_path
+                    for _attempt in range(1, 1000):
+                        candidate = organize_javorg.next_suffix_path(candidate)
+                        outcome = _move_one(connection, int(row["asset_id"]), old_path, candidate)
+                        if outcome == "ok":
+                            new_path = candidate
+                            break
+                        if outcome != SKIP_TARGET_EXISTS:
+                            break
             if outcome == "ok":
                 entries.append({"asset_id": int(row["asset_id"]),
                                 "old_path": old_path, "new_path": new_path})
@@ -509,4 +584,5 @@ __all__ = [
     "TemplateError", "UnverifiedRename", "apply_plan", "batch_log_dir", "build_plan",
     "latest_batch", "placeholder_values", "plan_path", "refuse_unverified", "rollback_batch",
     "unverified_location", "verified_renames", "write_plan",
+    "SKIP_MISC_TREE", "SKIP_ONLY_DIRS", "SKIP_PREFIX_RARE", "SKIP_NO_CODE",
 ]
