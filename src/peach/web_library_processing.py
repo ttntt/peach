@@ -4,6 +4,7 @@ import hashlib
 import logging
 
 from . import settings_file
+from .library_processing_scope import scoped_config, scoped_assets
 from .library_processing import (ALL_STAGES, COLLECT_STAGE, SCAN_STAGE, STAGES,
                                 METADATA_STAGE, PREVIEWS_STAGE, _asset_selection,
                                 decorate, issues_path, process_library, snapshot)
@@ -17,7 +18,7 @@ LOGGER = logging.getLogger(__name__)
 #: `asset_ids`、`completed_metadata` 等大字段，页面一个都不读；照发的话每页每 10 秒轮询一次
 #: 就是两兆多，还把媒体路径交给了浏览器。续跑与重试读的是 `_current()`，不经过这里。
 PUBLIC_FIELDS = frozenset({
-    'run_id', 'metadata_only', 'status', 'outcome', 'speed_mode', 'eta_seconds_min', 'eta_seconds_max', 'eta_kind',
+    'library_id', 'library_name', 'run_id', 'metadata_only', 'status', 'outcome', 'speed_mode', 'eta_seconds_min', 'eta_seconds_max', 'eta_kind',
     'eta_scope', 'eta_initial', 'job_id', 'stage', 'requested_stage', 'steps', 'checked', 'total',
     'scanned', 'scanned_bytes', 'identified', 'candidates', 'auto_applied', 'covers', 'previews',
     'performer_aliases', 'performer_avatars', 'performer_profile_conflicts',
@@ -105,10 +106,13 @@ def q_library_processing(contract, _args):
             body['scope'] = _args['scope']
         if 'asset_ids' in _args:
             body['asset_ids'] = json.loads(_args['asset_ids'])
+        if 'library_id' in _args:
+            body['library_id'] = _args['library_id']
+        config = scoped_config(config, body.get('library_id'))
         _, asset_ids, stage = _processing_request(contract, config, {}, body)
         from .processing_inventory import preview
         return {'traffic': preview(config, contract.db_path, stage, asset_ids, _args.get('inventory'),
-                                   incremental=body.get('incremental', False))}
+                                   incremental=body.get('incremental', False), library_id=body.get('library_id'))}
     state = _current(contract)
     run = _active_run(contract, state) if state.get('status') in ACTIVE else None
     if run is not None:
@@ -250,11 +254,7 @@ def _control_action(contract, config, body):
         identity = current_job_id.set(str(job_id))
         run = current_run.set(recovery.get('run_id'))
         try:
-            return w_library_processing(contract, {
-                'stage': previous.get('requested_stage') or ALL_STAGES,
-                **({'incremental': True} if previous.get('incremental') else
-                   {'asset_ids': previous['asset_ids']} if previous.get('asset_ids') else {}),
-                'speed_mode': control.mode}, resume=True)
+            return w_library_processing(contract, _resume_request(previous, control.mode), resume=True)
         finally:
             current_job_id.reset(identity)
             current_run.reset(run)
@@ -388,6 +388,28 @@ def _processing_request(contract, config, previous, body):
     return retry_ids, asset_ids, stage
 
 
+def _resume_request(previous, speed_mode):
+    """继续一趟暂停的任务：照原任务的阶段、媒体库、范围与流量保护授权重发，不另起范围。"""
+    return {
+        'stage': previous.get('requested_stage') or ALL_STAGES,
+        'library_id': previous.get('library_id'),
+        **({'incremental': True} if previous.get('incremental') else
+           {'asset_ids': previous['asset_ids']} if previous.get('asset_ids') else {}),
+        **({'allow_metered': True} if previous.get('allow_metered') else {}),
+        'speed_mode': speed_mode,
+    }
+
+
+def _metered_grant(body, stage, asset_ids):
+    """开了流量保护的目录只在人点名的影片上、只为抽帧读：整库同步与资料采集都不接受这个授权。"""
+    granted = (body or {}).get('allow_metered', False)
+    if type(granted) is not bool:
+        raise ValueError('流量保护授权必须为开关值')
+    if granted and (stage != PREVIEWS_STAGE or asset_ids is None):
+        raise ValueError('流量保护授权只用于指定影片的补全预览')
+    return granted
+
+
 def retry_after_network_recovery(contract, sync=None):
     """外网判回联网时，上一趟因断网跳过的外部资料自动补一次，等于替人点「立即重试」。
 
@@ -427,6 +449,26 @@ def _initial_speed(contract, control, previous, body, *, resume):
                       or default_mode(LedgerDatabase(contract.db_path)))
 
 
+def _scoped_processing_request(contract, config, previous, body, resume):
+    """冻结媒体库范围，拒绝重试换库与跨库的显式资产选择。"""
+    library_id = (body or {}).get('library_id')
+    if resume or (body or {}).get('retry') is not None:
+        previous_library = previous.get('library_id')
+        if library_id is not None and library_id != previous_library:
+            raise ValueError('重试或恢复必须沿用原任务的媒体库')
+        library_id = previous_library
+    config = scoped_config(config, library_id)
+    retry_ids, asset_ids, stage = _processing_request(contract, config, previous, body)
+    if library_id and asset_ids is not None:
+        selected = scoped_assets(config, contract.db_path, library_id, asset_ids)
+        if (body or {}).get('scope') != 'new' and set(selected) != set(asset_ids):
+            raise ValueError('所选影片不属于当前媒体库')
+        if not selected:
+            raise ValueError('所选媒体库暂无待处理影片')
+        asset_ids = selected
+    return config, library_id, retry_ids, asset_ids, stage
+
+
 def w_library_processing(contract, body, *, resume=False):
     config = settings_file.active()
     if (body or {}).get('action'):
@@ -436,8 +478,10 @@ def w_library_processing(contract, body, *, resume=False):
         return public_state(previous)
     if (body or {}).get('retry') is not None:
         previous['retryable_asset_ids'] = _remaining_retry_ids(contract, previous)
-    retry_ids, asset_ids, stage = _processing_request(contract, config, previous, body)
+    config, library_id, retry_ids, asset_ids, stage = _scoped_processing_request(
+        contract, config, previous, body, resume)
     incremental = (body or {}).get('incremental', False)
+    allow_metered = _metered_grant(body, stage, asset_ids)
     if (body or {}).get('scope') == 'new':
         from .library_new_assets import remember
         remember(contract.db_path, asset_ids)
@@ -449,7 +493,8 @@ def w_library_processing(contract, body, *, resume=False):
     def work(job_id):
         try:
             result = process_library(config, contract.db_path, contract.candidate_root, contract.cover_root,
-                job_id=job_id, retry_ids=retry_ids, stage=stage, asset_ids=asset_ids, incremental=incremental,
+                job_id=job_id, retry_ids=retry_ids, stage=stage, asset_ids=asset_ids, incremental=incremental, library_id=library_id,
+                allow_metered=allow_metered,
                 # 自动落库与页面写的是同一个 `LedgerDatabase`：进程内写锁在实例上，
                 # 另建一个就是在同一个进程里开第二条写入路径。
                 database=contract.database,
@@ -470,10 +515,16 @@ def w_library_processing(contract, body, *, resume=False):
     if incremental:
         from .library_new_assets import pending
         estimate_ids = pending(contract.db_path)
+    estimate_ids = scoped_assets(config, contract.db_path, library_id, estimate_ids)
+    library_name = config.library_catalog.get(library_id, {}).get('name', '')
     result = contract.library_processing_job.start(
         work, restart=True, initial={'stage': labels[stage], 'requested_stage': stage,
-                                    **initial_estimate(config, contract.db_path, stage, estimate_ids, mode)},
-        recovery={'stage': stage, 'speed_mode': mode, 'incremental': incremental,
+                                    'library_id': library_id, 'library_name': library_name,
+                                    **({'allow_metered': True} if allow_metered else {}),
+                                    **initial_estimate(config, contract.db_path, stage, estimate_ids, mode,
+                                                       allow_metered=allow_metered)},
+        recovery={'stage': stage, 'speed_mode': mode, 'incremental': incremental, 'library_id': library_id,
+                  **({'allow_metered': True} if allow_metered else {}),
                   **({'asset_ids': asset_ids or retry_ids}
                                     if asset_ids is not None or retry_ids is not None else {})})
     if not resume:

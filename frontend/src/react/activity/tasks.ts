@@ -23,7 +23,6 @@ export interface TaskResourcesPayload {
   gpu: TaskPercentMetric;
   network: TaskResourceMetric & { bytes_per_second: number | null };
   sampled_at: string;
-  detail?: string;
 }
 
 export interface TaskRunPayload {
@@ -161,7 +160,7 @@ const SUMMARY_LABELS: Record<string, string> = {
   missing: '文件已丢失', purge: '可删除记录', vanish: '需保留个人记录',
   empty: '空目录', unreadable: '无法读取', cache_files: '可清理缓存文件',
   cache_bytes: '可清理缓存大小', bytes_reclaimed: '已释放空间',
-  cache_removed: '已清理缓存文件', cache_blocked_count: '缓存清理失败',
+  cache_removed: '已清理缓存文件', cache_blocked_count: '缓存清理失败', files_removed: '已删除文件',
   purged: '已删除记录', vanished: '已标记文件丢失', reattached: '已转移记录',
   blocked_count: '未能删除记录', dirs_removed: '已删除空目录', dir_errors: '目录清理失败',
   marked: '已标记失效', recovered: '复查后可访问', entities: '涉及资料',
@@ -216,6 +215,7 @@ export function problemDestination(run: TaskRunPayload, latest = true): { href: 
     'resource-apply': ['/data-cleanup#resource-sync', '查看资源同步'],
     'media-repair': ['/data-cleanup#mediaRepair', '查看媒体修复'],
     'taste-refresh': ['/taste', '查看口味数据来源'],
+    'follow-evidence-reclaim': ['/settings/maintenance/repairs', '查看修复与迁移'],
   };
   const target = targets[run.task_key];
   return target ? { href: target[0], label: target[1] } : null;

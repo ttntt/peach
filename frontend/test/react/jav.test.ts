@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import { discoveryArtwork, javLibraryPath, javPath, javTab, type Discovery } from '../../src/react/jav/jav';
-import { discoveryKey, fetchDiscoveries, fetchReleases, releaseFilters, releaseKey } from '../../src/react/jav/jav';
+import { controlDiscoveryMetadata, discoveryKey, fetchDiscoveries, fetchDiscoveryMetadata, fetchReleases, releaseFilters,
+  releaseKey } from '../../src/react/jav/jav';
 import { discoveryScore, recommendationScore } from '../../src/react/jav/discovery-sorts';
 import { vi } from 'vitest';
 import { advanceImageFallback } from '../../src/card-art/image-fallback';
@@ -18,19 +19,22 @@ it('推荐标签使用固定百分制与档次，未知值和越界值有明确�
   }
   for (const value of [undefined, null, NaN, Infinity]) expect(recommendationScore(value)).toMatchObject({ score: '—', label: '资料未取得' });
 });
-it('发现查询隔离排序缓存，并在同一资料任务上轮询、停止与显式更新', async () => {
-  const requests: URL[] = [];
-  vi.stubGlobal('fetch', vi.fn(async (input: string) => {
-    requests.push(new URL(input, 'https://peach.test'));
+it('发现查询隔离排序缓存且只读，资料读取用 POST 起停、进度单独轮询', async () => {
+  const requests: { url: URL; method: string; body: unknown }[] = [];
+  vi.stubGlobal('fetch', vi.fn(async (input: string, init?: RequestInit) => {
+    requests.push({ url: new URL(input, 'https://peach.test'), method: init?.method || 'GET',
+      body: init?.body ? JSON.parse(String(init.body)) : null });
     return { ok: true, status: 200, json: async () => ({ items: [], candidate_total: 0, limited: false }) };
   }));
   try {
     const signal = new AbortController().signal;
-    await fetchDiscoveries('external', signal, { sort: 'source_score', direction: 'asc', jobId: 'current', cancelMetadata: true });
-    expect(Object.fromEntries(requests[0]!.searchParams)).toEqual({ scope: 'external', limit: '100', sort: 'source_score', direction: 'asc', metadata_job_id: 'current', metadata_cancel: '1' });
-    await fetchDiscoveries('external', signal, { refreshMetadata: true });
-    expect(requests[1]!.searchParams.get('metadata_refresh')).toBe('1');
-    expect(requests[1]!.searchParams.has('metadata_job_id')).toBe(false);
+    await fetchDiscoveries('external', signal, { sort: 'source_score', direction: 'asc' });
+    expect(Object.fromEntries(requests[0]!.url.searchParams)).toEqual({ scope: 'external', limit: '100', sort: 'source_score', direction: 'asc' });
+    await fetchDiscoveryMetadata(signal);
+    expect([requests[1]!.method, requests[1]!.url.pathname]).toEqual(['GET', '/api/jav/discoveries/metadata']);
+    await controlDiscoveryMetadata('cancel', { sort: 'duration', jobId: 'current' }, signal);
+    expect([requests[2]!.method, requests[2]!.url.pathname]).toEqual(['POST', '/api/jav/discoveries/metadata']);
+    expect(requests[2]!.body).toMatchObject({ action: 'cancel', sort: 'duration', direction: 'desc', job_id: 'current' });
     expect(discoveryKey('external', 'taste')).not.toEqual(discoveryKey('external', 'duration'));
   } finally { vi.unstubAllGlobals() }
 });

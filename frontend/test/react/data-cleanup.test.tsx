@@ -12,6 +12,8 @@ import type { DataCleanupSection } from '../../src/react/bundle';
 import { DataCleanupPage, DataCleanupToolPage } from '../../src/react/data-cleanup/data-cleanup-page';
 import { prefetchDataCleanupTool } from '../../src/react/data-cleanup/data-cleanup';
 import type { CleanupToolKey } from '../../src/cleanup-tools';
+import { CLEANUP_HASH_REDIRECTS } from '../../src/cleanup-tools';
+import { peachHistory } from '../../src/history';
 import { junkBreakdown, prefetchDataCleanup, reviewSummary } from '../../src/react/data-cleanup/data-cleanup';
 import { LinkManager } from '../../src/react/data-cleanup/link-manager';
 import type { LinkCheckState } from '../../src/react/data-cleanup/links';
@@ -32,6 +34,22 @@ afterEach(() => {
   sessionStorage.clear();
 });
 notifyManager.setScheduler((notify) => notify());
+
+for (const [hash, target] of Object.entries(CLEANUP_HASH_REDIRECTS)) {
+  it(`数据管理旧锚点 ${hash} 交路由打开工具正文且不增加历史条目`, async () => {
+    serve({});
+    peachHistory.replace('/data-cleanup?library=local' + hash);
+    const length = window.history.length;
+    await mount(<QueryClientProvider client={queryClient}>
+      <DataCleanupPage toast={vi.fn()} failure={vi.fn()} open={vi.fn()} navigate={vi.fn()} />
+    </QueryClientProvider>);
+    await settle();
+    expect(location.pathname + location.search).toBe(target + '?library=local');
+    expect(peachHistory.navigation.claimed).toBe(false);
+    expect(window.history.length).toBe(length);
+    peachHistory.replace('/');
+  });
+}
 
 const FAIL = Symbol('fail');
 /** 一条端点回非 2xx。 */
@@ -97,7 +115,11 @@ const organizeIdle: OrganizeData = {
   templates: { local: { file: '{code}', dir: '' } },
   presets: [{ label: '番号 + 标题', file: '{code}[ {title}]', dir: '{studio}' }],
   placeholders: [{ key: 'code', label: '番号' }, { key: 'title', label: '标题' }],
+  javorg_modes: [],
   last_batch: '',
+};
+const defaultRules = {
+  output_root: '', skip_dirs: [] as string[], only_dirs: [] as string[], prefix_min_count: 0, collision: 'skip',
 };
 
 /** 整页首屏要的每一条端点。 */
@@ -256,7 +278,7 @@ describe('资源同步', () => {
     expect(seen[0]!.title).toBe('清理失效条目');
     expect(seen[0]!.danger).toBe(true);
     expect(seen[0]!.body).toBe(
-      '将永久删除文件已不在盘上的 4 条记录（含回收站里的）、3 个空文件夹，并清理 2 个闲置缓存。来源根目录保留。这一步不可撤销。');
+      '将永久删除 4 条文件已不在的记录（含回收站）和 3 个空文件夹，并清理 2 个闲置缓存。这一步不可撤销。');
     expect(server.posts('/api/resource-sync/apply')).toEqual([
       { confirm: true, clean_cache: true, scan_id: 'scan-7', background: true },
     ]);
@@ -302,8 +324,8 @@ describe('资源同步', () => {
     await click(buttonNamed('清理失效条目', host));
     await settle();
     expect(seen[0]!.body).toBe(
-      '将永久删除文件已不在盘上的 3 条记录（含回收站里的）、3 个空文件夹，并清理 2 个闲置缓存。来源根目录保留。'
-      + '这几样不可撤销。2 条作品记录的文件已丢失，个人记录保留，可在「文件已丢失的记录」中转移个人记录或删除记录。');
+      '将永久删除 3 条文件已不在的记录（含回收站）和 3 个空文件夹，并清理 2 个闲置缓存。'
+      + '这几样不可撤销。2 条作品记录的文件已丢失，个人记录保留，可在「文件已丢失的记录」中处理。');
     await settle();
     expect(host.textContent).toContain(
       '1 条作品记录已标为文件丢失，可在「文件已丢失的记录」中处理。1 条的记录已接到库里的另一个版本。');
@@ -614,7 +636,7 @@ describe('整理', () => {
     serve({ '/api/organize': organizeIdle });
     queryClient.setQueryData(['organize'], organizeIdle);
     const host = await wrap(<OrganizeCard toast={vi.fn()} failure={vi.fn()} />);
-    const dir = host.querySelector<HTMLInputElement>('input[placeholder="留空表示原地改名"]')!;
+    const dir = host.querySelector<HTMLInputElement>('input[placeholder="留空表示原地改名；相对「输出根」"]')!;
     await type(dir, '厂牌/作品');
     await act(async () => { dir.focus(); dir.setSelectionRange(3, 5) });
     await click(host.querySelector('button[aria-label="番号 {code}"]'));
@@ -635,7 +657,7 @@ describe('整理', () => {
     await click(buttonNamed('番号 + 标题', host));
     expect(buttonNamed('执行整理', host)).toBeNull();
     expect(host.querySelector<HTMLInputElement>('input[placeholder="{code}[ {title}]"]')!.value).toBe('{code}[ {title}]');
-    expect(host.querySelector<HTMLInputElement>('input[placeholder="留空表示原地改名"]')!.value).toBe('{studio}');
+    expect(host.querySelector<HTMLInputElement>('input[placeholder="留空表示原地改名；相对「输出根」"]')!.value).toBe('{studio}');
     await click(host.querySelector('button[aria-label="标题 {title}"]'));
     expect(host.querySelector<HTMLInputElement>('input[placeholder="{code}[ {title}]"]')!.value).toBe('{code}[ {title}]{title}');
     expect(server.posts('/api/organize/apply')).toEqual([]);
@@ -668,7 +690,7 @@ describe('整理', () => {
     await click(buttonNamed('预览', host));
     await settle();
     expect(server.posts('/api/organize/preview')).toEqual([
-      { location: 'local', path: '', file_template: '{code} {title}', dir_template: '' },
+      { location: 'local', path: '', file_template: '{code} {title}', dir_template: '', ...defaultRules },
     ]);
     expect(server.posts('/api/settings')).toEqual([]);
     expect(host.textContent).toContain('2 个文件会改名或移动，5 个已经就是目标名字；跳过 缺番号 1。');
@@ -686,9 +708,10 @@ describe('整理', () => {
     await click(buttonNamed('执行整理', host));
     await settle();
     expect(seen.map((options) => options.title)).toEqual(['整理文件']);
-    expect(seen[0]!.body).toContain('「本地」上的文件名与目录');
+    expect(seen[0]!.body).toContain('「本地」上的全部文件');
+    expect(seen[0]!.body).toContain('撞名跳过');
     expect(server.posts('/api/organize/apply')).toEqual([
-      { location: 'local', path: '', file_template: '{code}', dir_template: '', confirm: true },
+      { location: 'local', path: '', file_template: '{code}', dir_template: '', ...defaultRules, confirm: true },
     ]);
     expect(server.posts('/api/settings')).toEqual([
       { organizeTemplates: { local: { file: '{code}', dir: '' } } },

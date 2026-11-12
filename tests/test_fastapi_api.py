@@ -190,6 +190,42 @@ class MediaCacheHeaderTests(unittest.TestCase):
 
 
 @unittest.skipUnless(HAS_DEPS, "FastAPI/httpx 尚未安装")
+class ContractJsonTests(unittest.TestCase):
+    def test_contract_reads_encode_to_the_same_bytes_as_the_framework_default(self):
+        from dataclasses import dataclass
+        from datetime import datetime, timezone
+        from fastapi.encoders import jsonable_encoder
+        from fastapi.responses import JSONResponse
+        from peach.routes_api import _json
+
+        @dataclass
+        class Point:
+            x: int
+
+        payload = {"ok": True, 3: "整数键", "path": Path("covers") / "ABC-001.jpg",
+                   "at": datetime(2026, 11, 6, 4, 0, tzinfo=timezone.utc), "set": {"甲"},
+                   "tuple": (1, 2.5, None), "point": Point(4), "nested": [{"名": "值"}]}
+        response = _json(payload)
+        self.assertEqual(response.body, JSONResponse(jsonable_encoder(payload)).body)
+        self.assertEqual(response.media_type, "application/json")
+        with self.assertRaises(ValueError):
+            _json({"nan": float("nan")})
+
+    def test_contract_reads_preserve_framework_encoding_for_non_string_keys(self):
+        from datetime import date
+        from enum import Enum
+        from fastapi.encoders import jsonable_encoder
+        from fastapi.responses import JSONResponse
+        from peach.routes_api import _json
+
+        class Key(Enum):
+            DAY = "day"
+
+        payload = {date(2026, 11, 6): {Path("covers"): {Key.DAY: "今天"}}}
+        self.assertEqual(_json(payload).body, JSONResponse(jsonable_encoder(payload)).body)
+
+
+@unittest.skipUnless(HAS_DEPS, "FastAPI/httpx 尚未安装")
 class RobotsTests(unittest.IsolatedAsyncioTestCase):
     """整站不进搜索引擎。
 
@@ -356,6 +392,7 @@ class FastApiContractTests(unittest.IsolatedAsyncioTestCase):
             taste_history_import_root=self.taste_import_root,
             taste_history_output_root=self.taste_output_root,
             taste_history_manifest=self.taste_manifest,
+            follow_state_root=self.root / 'state',
             entry_links_root=self.root / "state",
         )
         self.app = create_app(self.settings)
@@ -488,6 +525,7 @@ class FastApiContractTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual((await self.client.get("/api/background-issues")).status_code, 401)
             response = await self.client.get("/api/background-issues?t=secret")
         self.assertEqual(response.status_code, 200)
+        self.assertEqual([item['key'] for item in response.json()['issues']], ['network'])
         [issue] = response.json()["issues"]
         self.assertEqual((issue["key"], issue["href"], issue["since"], issue["retry"]),
                          ("network", "/settings/network#peachProxy", None, "/api/network-status/check"))
@@ -1113,6 +1151,11 @@ class FastApiContractTests(unittest.IsolatedAsyncioTestCase):
         bundled = await self.client.get('/source-icon?t=secret&provider=f95zone')
         self.assertEqual(bundled.status_code, 200)
         self.assertTrue(bundled.headers['content-type'].startswith('image/png'))
+        # Iwara 官方只有透明底白字形，浅色主题下看不见；内置图优先于缓存里那张白图。
+        from peach.config import PROJECT_ROOT
+        iwara = await self.client.get('/source-icon?t=secret&provider=iwara')
+        self.assertEqual(iwara.status_code, 200)
+        self.assertEqual(iwara.content, (PROJECT_ROOT / 'resources/site-marks/iwara.png').read_bytes())
         self.assertEqual(len(hits), 1)
         blocked = await self.client.get("/source-icon?t=secret&provider=simpcity")
         self.assertEqual(blocked.status_code, 404)
@@ -2548,6 +2591,22 @@ class FastApiContractTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(head.content, b"")
         self.assertEqual(head.headers["content-length"], "10")
 
+    async def test_a_range_request_stats_the_source_once(self):
+        """片源在网盘上时每次 stat 都是一趟网络往返：确认存在的那一次一路传到文件响应。"""
+        real_stat = os.stat
+        seen = []
+
+        def counting(path, *args, **kwargs):
+            if os.fspath(path) == str(self.media_file):
+                seen.append(path)
+            return real_stat(path, *args, **kwargs)
+        with patch("os.stat", counting):
+            partial = await self.client.get(
+                "/stream?id=1&session=detail-stat", headers={"X-Token": "secret", "Range": "bytes=2-5"})
+        self.assertEqual(partial.status_code, 206)
+        self.assertEqual(partial.content, b"2345")
+        self.assertEqual(len(seen), 1)
+
     async def test_follow_qualities_lists_every_tier_the_source_offers(self):
         """档位数量由来源决定，不由我们写死。
 
@@ -3403,11 +3462,38 @@ class FastApiContractTests(unittest.IsolatedAsyncioTestCase):
                     "/stream/hls/1/1.ts?session=hls-test&t=secret",
                 )
         submit.assert_called_once()
-        self.assertEqual(self.app.state.hls_plan_executor._max_workers, 2)
+        self.assertEqual(self.app.state.hls_plan_executor._max_workers, 8)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b"one segment")
         self.assertEqual(response.headers["content-type"], "video/mp2t")
         self.assertTrue(segment.exists(), "片段要留在缓存里，重复请求不该再跑一次 FFmpeg")
+
+    async def test_segments_reuse_the_plan_the_playlist_resolved_for_the_session(self):
+        """播放列表算好的计划记在会话上：之后每个分片不再读账本、问画像、排进计划执行器。"""
+        from peach import routes_media
+        con = sqlite3.connect(self.db)
+        con.execute("UPDATE asset SET location='115', duration=13.5, path=? WHERE id=1",
+                    (str(self.hls_file),))
+        con.commit()
+        con.close()
+        segment = self.root / "segment.ts"
+        segment.write_bytes(b"one segment")
+
+        async def generate(source, start, duration, **_kwargs):
+            return segment
+
+        playlist = await self.client.get("/stream/hls/1/index.m3u8?session=plan-once&t=secret")
+        self.assertEqual(playlist.status_code, 200)
+        with patch.object(self.app.state.hls_service, "generate", new=generate), \
+                patch.object(routes_media, "_hls_plan", side_effect=AssertionError("每片重算计划")), \
+                patch.object(self.app.state.hls_plan_executor, "submit",
+                             side_effect=AssertionError("排进计划执行器")):
+            for index in range(3):
+                response = await self.client.get(f"/stream/hls/1/{index}.ts?session=plan-once&t=secret")
+                self.assertEqual(response.status_code, 200)
+        cancelled = await self.client.post("/api/stream-cancel?session=plan-once&t=secret")
+        self.assertEqual(cancelled.status_code, 200)
+        self.assertIsNone(self.app.state.hls_session_plans.get("plan-once", 1))
 
     async def test_a_repaired_header_takes_a_broken_timestamp_file_off_the_transcode_path(self):
         """时间戳错乱的片子一旦有了修好的头，就该按 Range 无损播，不再实时转码。"""
@@ -3529,6 +3615,12 @@ class FastApiContractTests(unittest.IsolatedAsyncioTestCase):
             "If-None-Match": poster.headers["etag"],
         })
         self.assertEqual(denied.status_code, 401)
+
+    async def test_missing_poster_reports_which_step_failed(self):
+        """卡片按 `reason` 写缺图原因：没有接触印相时说的是缺印相，不是笼统的不可用。"""
+        missing = await self.client.get("/poster?id=999&c=4", headers={"X-Token": "secret"})
+        self.assertEqual(missing.status_code, 404)
+        self.assertEqual(missing.json(), {"error": "unavailable", "reason": "snapshot unavailable"})
 
     async def test_endcard_frame_is_authenticated_and_confined_to_evidence_root(self):
         denied = await self.client.get(

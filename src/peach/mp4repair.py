@@ -561,16 +561,17 @@ class HeaderRepairStore:
         self.runs = runs
         self._jobs = {}
 
-    def _name(self, asset_id: int, source: Path) -> str | None:
-        try:
-            stat = source.stat()
-        except OSError:
-            return None
+    def _name(self, asset_id: int, source: Path, stat=None) -> str | None:
+        if stat is None:
+            try:
+                stat = source.stat()
+            except OSError:
+                return None
         return f"{asset_id}-{stat.st_size}-{stat.st_mtime_ns}{SIDECAR_SUFFIX}"
 
-    def lookup(self, asset_id: int, source: Path) -> RepairedHeader | None:
-        """已经算好的头；没有就返回 None，不去算。"""
-        name = self._name(asset_id, source)
+    def lookup(self, asset_id: int, source: Path, *, stat=None) -> RepairedHeader | None:
+        """已经算好的头；没有就返回 None，不去算。`stat` 是调用方刚取过的片源 stat，给了就不再问网盘。"""
+        name = self._name(asset_id, source, stat)
         if not name:
             return None
         with self._guard:

@@ -223,6 +223,7 @@ class RouteTests(_App):
             source=f"magnet:?xt=urn:btih:{HASH}&dn=ABC-123", provider="115",
             target="/115/云下载", code="ABC-123")
         result.task.state = dl.INGESTED
+        result.task.next_check_at = None
         result.task.postprocess_state = dl.POSTPROCESS_PENDING
         self.service.store.save(result.task)
         contract = self.app.state.web_contract

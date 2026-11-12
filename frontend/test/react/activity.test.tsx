@@ -251,10 +251,7 @@ it('活动主任务和后继持续显示各自的CPU、GPU与实测网速', asyn
   expect(main.querySelector('[data-task-resource="network"]')?.textContent).toBe('网络 2 MB/s');
   expect(nested.querySelector('[data-task-resource="cpu"]')?.textContent).toBe('CPU 3%');
   expect(nested.querySelector('[data-task-resource="network"]')?.textContent).toBe('网络 1 KB/s');
-  expect(main.querySelector('[data-task-resource="cpu"]')?.getAttribute('title')).toContain('容器按可见 CPU 配额计算');
-  expect(main.querySelector('[data-task-resource="gpu"]')?.getAttribute('title')).toContain('最忙的 GPU 引擎');
-  expect(main.querySelector('[data-task-resource="network"]')?.getAttribute('title')).toContain('该任务已观测的下载速度');
-  expect([...main.querySelectorAll('[data-task-resource]')].every(node => node.getAttribute('tabindex') === '0')).toBe(true);
+  expect([...main.querySelectorAll('[data-task-resource]')].every(node => !node.hasAttribute('title'))).toBe(true);
 });
 
 it('资源采样中和未取得分别显示，原因优先说明，不把null填成零', async () => {
@@ -301,13 +298,12 @@ it('真实零读数写成未使用，高占用由该指标的真实high状态强
 });
 
 it('父任务已结束而后继仍在活动时展示后端聚合读数，历史终态不展示旧采样', async () => {
-  const parent = run({ id: 1, status: 'succeeded', resources: resources({ detail: '统计这轮仍在活动的全部后继' }) });
+  const parent = run({ id: 1, status: 'succeeded', resources: resources() });
   const historical = run({ id: 2, status: 'cancelled', resources: resources() });
   const { host } = await open(payload({ running: [followup(1, { status: 'pending' })],
     finished: [parent, historical], followup_counts: { '1': { pending: 100 } } }));
   expect(host.querySelector('[data-task-resources="1"]')).not.toBeNull();
-  expect(host.querySelector('[data-task-resources="1"] [data-task-resource="cpu"]')?.getAttribute('title'))
-    .toContain('全部后继');
+  expect(host.querySelector('[data-task-resources="1"] [data-task-resource="cpu"]')?.textContent).toBe('CPU 12.5%');
   expect(host.querySelector('[data-task-resources="2"]')).toBeNull();
 });
 
@@ -758,7 +754,7 @@ it('派出几十条后继的几批合成一张进行中的卡，进度按计数�
   expect(card.textContent).toContain('2 批');
   expect(card.textContent).toContain('已处理 62 / 128 项 · 其中 2 项失败');
   expect(card.querySelector('summary')?.textContent).toBe('任务明细 · 128 项');
-  expect(card.textContent).toContain('列出其中 2 项，正在处理的排在前面');
+  expect(card.textContent).toContain('列出其中 2 项');
   const rows = [...card.querySelectorAll('[data-followup-key]')];
   expect(rows.map((row) => row.getAttribute('data-status'))).toEqual(['running', 'pending']);
   expect(rows[0]!.textContent).toContain('ABC-001 · 采集缺失资料');

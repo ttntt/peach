@@ -12,7 +12,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { RiCheckboxCircleLine } from '@remixicon/react';
-import { Tab, TabPanel, Tabs } from 'react-aria-components';
 
 import { Button } from '@/components/base/buttons/button';
 import type { ReviewProps } from '../bundle';
@@ -21,7 +20,7 @@ import { DataTableFooter } from '../components/table-controls';
 import { EmptyState } from '../components/empty-state';
 import { Note } from '../components/note';
 import { Page } from '../components/page';
-import { PillAriaTabList } from '../components/pill-aria-tab-list';
+import { SortableBoardTabs, useNavigationOrder } from '../components/navigation-order';
 import { ExternalLink } from '../settings/section';
 import { AutoLandingsCard } from './auto-landings-card';
 import { BulkToolbar } from './bulk-toolbar';
@@ -40,6 +39,7 @@ import {
 const TAB_CLASS = 'flex cursor-pointer items-center justify-between gap-2';
 
 export function ReviewPage(props: ReviewProps) {
+  const categoryOrder = useNavigationOrder('review').keys.filter(isReviewCategory);
   const [narrow, setNarrow] = useState(() => matchMedia('(max-width:900px)').matches);
   useEffect(() => {
     const query = matchMedia('(max-width:900px)');
@@ -256,33 +256,24 @@ export function ReviewPage(props: ReviewProps) {
       <GenreTagList tags={genreTags} />
 
       {/* 分类目录位于正文左侧；窄屏使用正文上方的导航。 */}
-      <Tabs orientation={narrow ? 'horizontal' : 'vertical'} selectedKey={category} onSelectionChange={(key) => {
-        const next = String(key);
-        if (isReviewCategory(next)) goCategory(next);
-      }} className="flex flex-col gap-5 review-split:flex-row review-split:items-start review-split:gap-6">
+      <div className="flex flex-col gap-5 review-split:flex-row review-split:items-start review-split:gap-6">
         <div data-section-nav className="w-full min-w-0 review-split:sticky review-split:top-topbar review-split:w-review-tabs review-split:shrink-0">
           <h2 id="reviewcategories">复核分类</h2>
-          <PillAriaTabList scrollable={narrow} aria-labelledby="reviewcategories" data-section-items
-            className="flex review-split:flex-col review-split:items-stretch">
-            {REVIEW_CATEGORIES.map((key) => {
+          <SortableBoardTabs group="review" label="复核分类" value={category} onChange={goCategory}
+            orientation={narrow ? 'horizontal' : 'vertical'} panelPrefix="review" sectionItems
+            className="" itemClassName={TAB_CLASS} disabled={decide.isPending || bulk.isPending}
+            tabs={REVIEW_CATEGORIES.map((key) => {
               const count = Number(snapshot.counts[key] || 0);
-              return (
-                <Tab key={key} id={key} className={TAB_CLASS} isDisabled={decide.isPending || bulk.isPending}
-                  data-pill-selected={category === key ? '' : undefined} data-pill-variant="gray">
-                  {REVIEW_LABELS[key]}
-                  {/* 计数走独立徽标，为 0 时整枚去掉，不留一个「0」占位。 */}
-                  {count
+              return { value: key, label: REVIEW_LABELS[key], badge: count
                     ? <span className="tabular-nums text-caption-1-medium text-text-secondary">
                         {count.toLocaleString()}
                       </span>
-                    : null}
-                </Tab>
-              );
-            })}
-          </PillAriaTabList>
+                    : null };
+            })} />
         </div>
 
-        <TabPanel id={category} className="flex min-w-0 flex-1 flex-col gap-5">
+        <div role="tabpanel" id={`review-panel-${category}`} aria-labelledby={`review-tab-${category}`}
+          className="flex min-w-0 flex-1 flex-col gap-5">
             <BulkToolbar queueView={queueView} queueCounts={queueCounts} onQueueChange={goQueue} locked={locked}
               fields={fields} fieldFilter={activeField}
               onFieldFilter={(next) => { setFieldFilter(next); setFilter(''); setPage(1) }}
@@ -352,7 +343,7 @@ export function ReviewPage(props: ReviewProps) {
             <EmptyState icon={RiCheckboxCircleLine} title={`此分类没有${REVIEW_QUEUE_LABELS[queueView]}项目`}
               actions={REVIEW_CATEGORIES.some(key => key !== category && Number(snapshot.counts[key] || 0) > 0)
                 ? <Button size="small" onClick={() => {
-                    const next = REVIEW_CATEGORIES.find(key => key !== category && Number(snapshot.counts[key] || 0) > 0);
+                    const next = categoryOrder.find(key => key !== category && Number(snapshot.counts[key] || 0) > 0);
                     if (next) goCategory(next);
                   }}>查看其他分类</Button> : undefined}>
               {queueView === 'pending' ? '可切换分类查看其他待确认资料。' : `${REVIEW_QUEUE_LABELS[queueView]}的资料会保留在这里，可恢复到待处理。`}
@@ -365,8 +356,8 @@ export function ReviewPage(props: ReviewProps) {
           {metadata && queueView === 'pending'
             ? <AutoLandingsCard locked={locked} openItem={openItem} toast={toast} />
             : null}
-        </TabPanel>
-      </Tabs>
+        </div>
+      </div>
       </div>
     </Page>
   );

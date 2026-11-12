@@ -25,10 +25,10 @@ export const REVIEW_KEY = ['review'] as const;
 export const REVIEW_LABELS = {
   metadata_fields: '元数据字段',
   creator_tags: '创作者标签',
-  studio_logos: '厂牌 Logo',
-  performer_avatars: '女优头像',
-  western_identity: '西方身份回配',
   code_creators: '番号目录存疑',
+  western_identity: '西方身份回配',
+  performer_avatars: '女优头像',
+  studio_logos: '厂牌 Logo',
   fc2_markings: 'FC2 评论标记',
   fc2_similarity: 'FC2 跨号相似',
   video_endcards: '片尾/出处证据',
