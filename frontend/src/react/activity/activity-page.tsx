@@ -191,7 +191,7 @@ function RunCard(
           isOpen={detailOpen} onOpenChange={setDetailOpen}>
           {detail.error ? <Note tone="error">{errorMessage(detail.error)}</Note> : null}
           {shown < total
-            ? <p className="text-caption-1-regular text-text-secondary">列出其中 {shown.toLocaleString()} 项，正在处理的排在前面</p>
+            ? <p className="text-caption-1-regular text-text-secondary">列出其中 {shown.toLocaleString()} 项</p>
             : null}
           <FollowupList rows={listed} />
         </Disclosure>
@@ -208,7 +208,8 @@ function RunCard(
   );
 }
 
-function RunningRun({ run, followups }: { run: TaskRunPayload; followups?: TaskRunPayload[] }) {
+function RunningRun({ run, followups, followupTotal }:
+  { run: TaskRunPayload; followups?: TaskRunPayload[]; followupTotal?: number }) {
   const total = run.progress_total || 0;
   const current = run.progress_current || 0;
   const control = run.control?.state;
@@ -218,7 +219,7 @@ function RunningRun({ run, followups }: { run: TaskRunPayload; followups?: TaskR
   const meta = [TRIGGER_LABELS[run.trigger] || run.trigger, elapsed && `已跑 ${elapsed}`]
     .filter(Boolean).join(' · ');
   return (
-    <RunCard run={run} meta={meta} followups={followups}>
+    <RunCard run={run} meta={meta} followups={followups} followupTotal={followupTotal}>
       {total > 0
         ? <div className="flex flex-col gap-1.5">
             <Progress label={label} value={Math.min(current, total)} max={total} />
@@ -426,7 +427,8 @@ export function ActivityPage() {
               {running.length || working.length
                 ? <RunList live>
                     {running.map((run) => (
-                      <RunningRun key={run.id} run={run} followups={byParent.get(run.id)} />))}
+                      <RunningRun key={run.id} run={run} followups={byParent.get(run.id)}
+                        followupTotal={followupTally(counts, [run]).total} />))}
                     {workingGroups.map(({ run, runs }) => (
                       <WorkingRun key={run.id} runs={runs} followups={childrenOf(runs)} counts={counts} />))}
                   </RunList>

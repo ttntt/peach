@@ -54,8 +54,8 @@ Movie demo data; see [asset credits and licenses](https://peach.video/en/credits
 
 | Method | Get started |
 | --- | --- |
-| Windows x64 | [Installer](https://github.com/peach-mitao/peach/releases/download/v0.50.0/Peach-0.50.0-windows-x64-setup.exe) · [Portable](https://github.com/peach-mitao/peach/releases/download/v0.50.0/Peach-0.50.0-windows-x64.zip) |
-| macOS | [Apple Silicon / ARM64](https://github.com/peach-mitao/peach/releases/download/v0.50.0/Peach-0.50.0-macos-arm64.dmg) · [Intel / x86_64](https://github.com/peach-mitao/peach/releases/download/v0.50.0/Peach-0.50.0-macos-x86_64.dmg) |
+| Windows x64 | [Installer](https://github.com/peach-mitao/peach/releases/download/v0.56.0/Peach-0.56.0-windows-x64-setup.exe) · [Portable](https://github.com/peach-mitao/peach/releases/download/v0.56.0/Peach-0.56.0-windows-x64.zip) |
+| macOS | [Apple Silicon / ARM64](https://github.com/peach-mitao/peach/releases/download/v0.56.0/Peach-0.56.0-macos-arm64.dmg) · [Intel / x86_64](https://github.com/peach-mitao/peach/releases/download/v0.56.0/Peach-0.56.0-macos-x86_64.dmg) |
 | Docker / NAS | [Deployment guide](docs/DOCKER.md) |
 | Source | [Setup instructions](docs/OPERATIONS.md#从源码运行windowsmacos); requires Git, uv and Python 3.14+ |
 

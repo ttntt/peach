@@ -8,14 +8,12 @@ from __future__ import annotations
 import ntpath
 import re
 from collections import Counter
-from dataclasses import dataclass, field, fields, replace
+from dataclasses import dataclass
 from pathlib import PureWindowsPath
 
 from .catalog_rules import (
     code_letter_stem, is_jav_code, normalise_code_key, release_code_from_filename,
 )
-from .platform import resolve_root
-
 #: 与 javorg organize.c SKIP_ENTIRE 对齐：dvd-back 预设默认填入 skip_dirs。
 SKIP_ENTIRE_TOP: tuple[str, ...] = (
     "guaxiao", "guaxiao1", "JAV_output", "gc", "by-code", "euo",

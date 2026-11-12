@@ -373,8 +373,8 @@ def user_cancelled(db_path, job_id):
     return bool(job_id) and data.get('job_id') == job_id and data.get('cancelled') is True
 
 
-def initial_estimate(config, db_path, stage, asset_ids=None, mode=None):
-    """仅使用账本统计，不在启动 HTTP 请求里遍历媒体目录。"""
+def initial_estimate(config, db_path, stage, asset_ids=None, mode=None, *, allow_metered=False):
+    """仅使用账本统计，不在启动 HTTP 请求里遍历媒体目录。预览的范围同 `preview_readable`。"""
     if mode is None:
         from .repository import LedgerDatabase
         mode = execution_mode(LedgerDatabase(db_path), control=current_control())
@@ -384,7 +384,12 @@ def initial_estimate(config, db_path, stage, asset_ids=None, mode=None):
         query += ' AND id IN (SELECT value FROM json_each(?))'
         parameters.append(json.dumps(asset_ids))
     if stage == 'previews':
-        query += " AND location='local' AND (snapshot_path IS NULL OR snapshot_path='')"
+        query += " AND location != 'online' AND (snapshot_path IS NULL OR snapshot_path='')"
+        if not allow_metered:
+            from .media_sources import cost_sql
+            expression, values = cost_sql(config=config)
+            query += f" AND {expression}='free'"
+            parameters += list(values)
     if config.locations:
         query += ' AND location IN (' + ','.join('?' * len(config.locations)) + ')'
         parameters += list(config.locations)

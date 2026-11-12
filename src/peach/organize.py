@@ -26,6 +26,7 @@ from .catalog_rules import (
 )
 from . import organize_javorg
 from .jobs import ACTIVE_ASSET_SQL
+from .task_retry import transient_delay
 from .organize_templates import MAX_PATH, TemplateError, clean_filename, render, validate_template
 from .platform import (is_windows_path, location_mounts, location_roots, resolve_root, root_online,
                        translate_ledger_path, within_root)
@@ -237,6 +238,112 @@ def scope_path(location: str, path: str = '', roots=None) -> str:
     return canonical
 
 
+def _skip_row(row, location: str, reason: str, target: str = "") -> dict:
+    return {"asset_id": row["id"], "location": location,
+            "current_path": str(row["path"]), "target_path": target,
+            "action": "skip", "reason": reason}
+
+
+def _rules_hold(row, path: str, root: str, *, location: str, parsed, performers,
+               prefix_counts, enrich: bool, dir_template: str,
+               selected_path: str) -> tuple[str, dict | None] | None:
+    """附加规则拦下这一行时返回决定；放行时返回 None，交给模板计算目标。"""
+    if organize_javorg.under_named_tops(root, path, parsed.skip_dirs):
+        values_probe = placeholder_values(row, performers.get(int(row["id"]), []))
+        if enrich:
+            values_probe = organize_javorg.enrich_values(values_probe, row)
+        base_probe = organize_javorg.resolve_output_base(root, selected_path, parsed.output_root)
+        dest_probe = base_probe
+        if dir_template:
+            rendered_probe, absent_probe = render(dir_template, values_probe, directory=True)
+            if rendered_probe and not absent_probe:
+                dest_probe = ntpath.join(base_probe, *rendered_probe.split("/"))
+        if organize_javorg.already_at_dest(path, dest_probe):
+            return "unchanged", None
+        return "row", _skip_row(row, location, SKIP_MISC_TREE)
+    if not organize_javorg.top_allowed(root, path, parsed.only_dirs):
+        return "row", _skip_row(row, location, SKIP_ONLY_DIRS)
+    if prefix_counts is not None:
+        values = placeholder_values(row, performers.get(int(row["id"]), []))
+        if enrich:
+            values = organize_javorg.enrich_values(values, row)
+        prefix = values.get("prefix") or ""
+        if not prefix or prefix_counts[prefix.casefold()] <= parsed.prefix_min_count:
+            return "row", _skip_row(row, location, SKIP_PREFIX_RARE)
+    return None
+
+
+def _plan_row(row, *, location: str, declared, root_states, parsed, performers,
+              prefix_counts, use_suffix: bool, enrich: bool, dir_template: str,
+              file_template: str, selected_path: str, claimed: dict) -> tuple[str, dict | None]:
+    """决定一行是保持原样，还是给出一条计划（跳过或改名/移动）。"""
+    path = str(row["path"])
+    matched, index, _tail = resolve_root(path, declared)
+    if matched != location or index < 0:
+        return "row", _skip_row(row, location, SKIP_OUTSIDE_ROOT)
+    root = declared[location][index]
+    if root_states is not None and not root_states[index]:
+        return "row", _skip_row(row, location, SKIP_OFFLINE)
+    held = _rules_hold(
+        row, path, root, location=location, parsed=parsed, performers=performers,
+        prefix_counts=prefix_counts, enrich=enrich, dir_template=dir_template,
+        selected_path=selected_path)
+    if held is not None:
+        return held
+    values = placeholder_values(row, performers.get(int(row["id"]), []))
+    if enrich:
+        values = organize_javorg.enrich_values(values, row)
+    current_dir = ntpath.dirname(path)
+    base = organize_javorg.resolve_output_base(root, selected_path, parsed.output_root)
+    target_dir = current_dir
+    missing: set[str] = set()
+    if dir_template:
+        rendered, absent = render(dir_template, values, directory=True)
+        missing |= absent
+        if not rendered:
+            return "row", _skip_row(row, location, SKIP_MISSING_FIELD)
+        target_dir = ntpath.join(base, *rendered.split("/"))
+    elif parsed.output_root:
+        target_dir = base
+    name = str(row["name"] or ntpath.basename(path))
+    target_name = clean_filename(name)
+    if file_template:
+        rendered, absent = render(file_template, values)
+        missing |= absent
+        if not rendered:
+            return "row", _skip_row(row, location, SKIP_MISSING_FIELD)
+        target_name = rendered + _extension(name)
+    if missing:
+        return "row", _skip_row(row, location, SKIP_MISSING_FIELD)
+    target = ntpath.join(target_dir, target_name)
+    # 路径原文相同才算已经是目标名字。仅大小写不同的路径列入计划。
+    if target == path:
+        return "unchanged", None
+    if ntpath.splitdrive(target)[0].casefold() != ntpath.splitdrive(path)[0].casefold():
+        return "row", _skip_row(row, location, SKIP_CROSS_VOLUME, target)
+    if len(target) > MAX_PATH:
+        return "row", _skip_row(row, location, SKIP_TOO_LONG, target)
+    if use_suffix:
+        target = organize_javorg.unique_path(target, claimed, int(row["id"]))
+        if target == path:
+            return "unchanged", None
+    else:
+        occupant = claimed.get(target.casefold())
+        if occupant is not None and occupant != int(row["id"]):
+            return "row", _skip_row(row, location, SKIP_TARGET_EXISTS, target)
+    claimed.pop(path.casefold(), None)
+    claimed[target.casefold()] = int(row["id"])
+    entry = {
+        "asset_id": row["id"], "location": location, "current_path": path,
+        "target_path": target,
+        "action": "rename" if target_dir.casefold() == current_dir.casefold() else "move",
+        "reason": "",
+    }
+    if use_suffix:
+        entry["allow_suffix"] = True
+    return "row", entry
+
+
 def build_plan(connection: sqlite3.Connection, *, location: str,
                file_template: str = "", dir_template: str = "",
                roots=None, online: bool | None = None,
@@ -287,98 +394,19 @@ def build_plan(connection: sqlite3.Connection, *, location: str,
     enrich = parsed.active
 
     for row in rows:
-        path = str(row["path"])
-        matched, index, _tail = resolve_root(path, declared)
-        if matched != location or index < 0:
-            skip(row, SKIP_OUTSIDE_ROOT)
-            continue
-        root = declared[location][index]
-        if root_states is not None and not root_states[index]:
-            skip(row, SKIP_OFFLINE)
-            continue
-        if organize_javorg.under_named_tops(root, path, parsed.skip_dirs):
-            # 已在「若整理会落到的位置」则算 unchanged，避免把已归集的 guaxiao1 树报成跳过。
-            values_probe = placeholder_values(row, performers.get(int(row["id"]), []))
-            if enrich:
-                values_probe = organize_javorg.enrich_values(values_probe, row)
-            base_probe = organize_javorg.resolve_output_base(root, selected_path, parsed.output_root)
-            dest_probe = base_probe
-            if dir_template:
-                rendered_probe, absent_probe = render(dir_template, values_probe, directory=True)
-                if rendered_probe and not absent_probe:
-                    dest_probe = ntpath.join(base_probe, *rendered_probe.split("/"))
-            if organize_javorg.already_at_dest(path, dest_probe):
-                counts["unchanged"] += 1
-                continue
-            skip(row, SKIP_MISC_TREE)
-            continue
-        if not organize_javorg.top_allowed(root, path, parsed.only_dirs):
-            skip(row, SKIP_ONLY_DIRS)
-            continue
-        values = placeholder_values(row, performers.get(int(row["id"]), []))
-        if enrich:
-            values = organize_javorg.enrich_values(values, row)
-        if prefix_counts is not None:
-            prefix = values.get("prefix") or ""
-            if not prefix or prefix_counts[prefix.casefold()] <= parsed.prefix_min_count:
-                skip(row, SKIP_PREFIX_RARE)
-                continue
-        current_dir = ntpath.dirname(path)
-        base = organize_javorg.resolve_output_base(root, selected_path, parsed.output_root)
-        target_dir = current_dir
-        missing: set[str] = set()
-        if dir_template:
-            rendered, absent = render(dir_template, values, directory=True)
-            missing |= absent
-            if not rendered:
-                skip(row, SKIP_MISSING_FIELD)
-                continue
-            target_dir = ntpath.join(base, *rendered.split("/"))
-        elif parsed.output_root:
-            target_dir = base
-        name = str(row["name"] or ntpath.basename(path))
-        target_name = clean_filename(name)
-        if file_template:
-            rendered, absent = render(file_template, values)
-            missing |= absent
-            if not rendered:
-                skip(row, SKIP_MISSING_FIELD)
-                continue
-            target_name = rendered + _extension(name)
-        if missing:
-            skip(row, SKIP_MISSING_FIELD)
-            continue
-        target = ntpath.join(target_dir, target_name)
-        if target.casefold() == path.casefold():
+        kind, entry = _plan_row(
+            row, location=location, declared=declared, root_states=root_states,
+            parsed=parsed, performers=performers, prefix_counts=prefix_counts,
+            use_suffix=use_suffix, enrich=enrich, dir_template=dir_template,
+            file_template=file_template, selected_path=selected_path, claimed=claimed)
+        if kind == "unchanged":
             counts["unchanged"] += 1
             continue
-        if ntpath.splitdrive(target)[0].casefold() != ntpath.splitdrive(path)[0].casefold():
-            skip(row, SKIP_CROSS_VOLUME, target)
-            continue
-        if len(target) > MAX_PATH:
-            skip(row, SKIP_TOO_LONG, target)
-            continue
-        if use_suffix:
-            target = organize_javorg.unique_path(target, claimed, int(row["id"]))
-            if target.casefold() == path.casefold():
-                counts["unchanged"] += 1
-                continue
+        if entry["action"] == "skip":
+            counts["skip"] += 1
+            reasons[entry["reason"]] = reasons.get(entry["reason"], 0) + 1
         else:
-            occupant = claimed.get(target.casefold())
-            if occupant is not None and occupant != int(row["id"]):
-                skip(row, SKIP_TARGET_EXISTS, target)
-                continue
-        claimed.pop(path.casefold(), None)
-        claimed[target.casefold()] = int(row["id"])
-        counts["change"] += 1
-        entry = {
-            "asset_id": row["id"], "location": location, "current_path": path,
-            "target_path": target,
-            "action": "rename" if target_dir.casefold() == current_dir.casefold() else "move",
-            "reason": "",
-        }
-        if use_suffix:
-            entry["allow_suffix"] = True
+            counts["change"] += 1
         plan.append(entry)
     return {"rows": plan, "counts": counts, "reasons": reasons}
 
@@ -441,6 +469,16 @@ def _update_row(connection: sqlite3.Connection, asset_id: int,
     ).rowcount
 
 
+class MoveFailure(str):
+    """保留原有原因字符串，并把可自动恢复的移动失败带回批次结果。"""
+
+    def __new__(cls, reason: str, *, retry_after: float | None):
+        value = super().__new__(cls, reason)
+        value.retryable = retry_after is not None
+        value.retry_after = retry_after
+        return value
+
+
 def _move_one(connection: sqlite3.Connection, asset_id: int,
               old_path: str, new_path: str) -> str:
     """动一个文件并同步账本；返回 `ok` 或跳过／失败原因。
@@ -464,7 +502,7 @@ def _move_one(connection: sqlite3.Connection, asset_id: int,
     try:
         _rename(old_path, new_path)
     except OSError as error:
-        return f"改名失败：{error.strerror or error}"
+        return MoveFailure(f"改名失败：{error.strerror or error}", retry_after=transient_delay(error))
     try:
         if not _update_row(connection, asset_id, old_path, new_path):
             raise OrganizeError("数据库里这一行已经变了")
@@ -477,6 +515,23 @@ def _move_one(connection: sqlite3.Connection, asset_id: int,
         except OSError:
             return f"数据库写入失败且改不回原名，需要人工处理：{error}"
     return "ok"
+
+
+def _move_with_suffix(connection: sqlite3.Connection, asset_id: int,
+                      old_path: str, new_path: str) -> tuple[str, str]:
+    """先按计划路径改名；目标已存在时改用 `-1`/`-2`，返回结果和实际落到的路径。"""
+    outcome = _move_one(connection, asset_id, old_path, new_path)
+    if outcome != SKIP_TARGET_EXISTS:
+        return outcome, new_path
+    candidate = new_path
+    for _attempt in range(1, 1000):
+        candidate = organize_javorg.next_suffix_path(candidate)
+        outcome = _move_one(connection, asset_id, old_path, candidate)
+        if outcome == "ok":
+            return outcome, candidate
+        if outcome != SKIP_TARGET_EXISTS:
+            return outcome, new_path
+    return outcome, new_path
 
 
 def apply_plan(connection: sqlite3.Connection, rows: Sequence[dict], *,
@@ -511,25 +566,21 @@ def apply_plan(connection: sqlite3.Connection, rows: Sequence[dict], *,
                       and (old_path.casefold() == new_path.casefold() or not _media_path(old_path).exists()))
             if current is None or current[1] is not None:
                 outcome = '资产已不在馆藏，未执行整理'
+            elif landed:
+                outcome = 'ok'
+            elif row.get("allow_suffix"):
+                outcome, new_path = _move_with_suffix(
+                    connection, int(row["asset_id"]), old_path, new_path)
             else:
-                outcome = 'ok' if landed else _move_one(connection, int(row["asset_id"]), old_path, new_path)
-                if (outcome == SKIP_TARGET_EXISTS and row.get("allow_suffix")
-                        and not landed):
-                    candidate = new_path
-                    for _attempt in range(1, 1000):
-                        candidate = organize_javorg.next_suffix_path(candidate)
-                        outcome = _move_one(connection, int(row["asset_id"]), old_path, candidate)
-                        if outcome == "ok":
-                            new_path = candidate
-                            break
-                        if outcome != SKIP_TARGET_EXISTS:
-                            break
+                outcome = _move_one(connection, int(row["asset_id"]), old_path, new_path)
             if outcome == "ok":
                 entries.append({"asset_id": int(row["asset_id"]),
                                 "old_path": old_path, "new_path": new_path})
             else:
                 failures.append({"asset_id": int(row["asset_id"]),
-                                 "path": old_path, "reason": outcome})
+                                 "path": old_path, "reason": outcome,
+                                 "retryable": isinstance(outcome, MoveFailure) and outcome.retryable,
+                                 "retry_after": outcome.retry_after if isinstance(outcome, MoveFailure) else None})
             save()
             if progress:
                 progress(checked=index, total=len(movable))

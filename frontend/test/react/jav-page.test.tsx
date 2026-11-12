@@ -46,19 +46,19 @@ it('想要已有清单立即返回，陈旧数据在后台更新', async () => {
   expect(fetcher).toHaveBeenCalledOnce();
 });
 
-it('JAV 分区导航有馆藏、新作、发现、想要四个入口，馆藏使用目录搜索', async () => {
+it('JAV 分区导航依次显示馆藏、想要、新作、发现，馆藏使用目录搜索', async () => {
   const navigate = vi.fn(), find = vi.fn();
   const host = await mount(<JavHeader tab="library" navigate={navigate} find={find} />);
   const tabs = [...host.querySelectorAll('[role="tab"]')];
-  expect(tabs.map(tab => tab.textContent?.trim())).toEqual(['馆藏', '新作', '发现', '想要']);
+  expect(tabs.map(tab => tab.textContent?.trim())).toEqual(['馆藏', '想要', '新作', '发现']);
   expect(tabs[0]?.getAttribute('aria-selected')).toBe('true');
   expect(host.querySelector('input')).toBeNull();
   await click(tabs[1]);
-  expect(navigate).toHaveBeenLastCalledWith('/jav?tab=releases');
-  await click(tabs[2]);
-  expect(navigate).toHaveBeenLastCalledWith('/jav?tab=discover');
-  await click(tabs[3]);
   expect(navigate).toHaveBeenLastCalledWith('/jav?tab=wants');
+  await click(tabs[2]);
+  expect(navigate).toHaveBeenLastCalledWith('/jav?tab=releases');
+  await click(tabs[3]);
+  expect(navigate).toHaveBeenLastCalledWith('/jav?tab=discover');
   await click(buttonNamed('查找资源', host));
   expect(find).toHaveBeenCalledOnce();
 });
@@ -249,6 +249,39 @@ it('没有推荐时空态的查看口味在左，主入口在右', async () => {
   const main = [...host.querySelectorAll('[data-empty-state] a')].find((link) => link.textContent === '浏览馆藏');
   expect(main?.className).toContain('bg-button-primary');
 });
+
+it('新作列表只读：从没读过资料的由 POST 起读一次，进度单独轮询，读完才重取列表', async () => {
+  const before = location.pathname + location.search;
+  history.replaceState(null, '', '/jav?tab=releases&performer=女优甲');
+  const job = (status: string, completed: number) => ({ metadata_job: { job_id: 'm', status, completed, total: 2,
+    failed: 0, requests: 0, bytes: 0 }, poll_after_ms: 1000 });
+  let polls = 0;
+  const fetcher = vi.fn(async (url: string, init?: RequestInit) => {
+    const path = new URL(url, location.origin).pathname;
+    const body = path === '/api/jav/releases/metadata' ? job('running', 0)
+      : path === '/api/jav/discoveries/metadata' ? (polls += 1, polls > 1 ? job('complete', 2) : job('running', 1))
+        : { items: [], total: 0, candidate_total: 0, page: 1, size: 24, metadata_unread: 2,
+          facets: { performers: [], studios: [], tags: [] } };
+    void init;
+    return { ok: true, status: 200, json: async () => body } as Response;
+  });
+  vi.stubGlobal('fetch', fetcher);
+  const host = await mount(<QueryClientProvider client={queryClient}><JavPage tab="releases" readOnly navigate={vi.fn()} receipt={vi.fn()} /></QueryClientProvider>);
+  await settle();
+  const calls = (path: string) => fetcher.mock.calls.filter(([url]) => new URL(url, location.origin).pathname === path);
+  const started = calls('/api/jav/releases/metadata');
+  expect(started).toHaveLength(1);
+  expect(JSON.parse(String(started[0]?.[1]?.body))).toMatchObject({ action: 'start', performer: '女优甲', sort: 'release_date' });
+  expect(host.querySelector('[data-jav-metadata] [role="progressbar"]')).not.toBeNull();
+  await act(() => new Promise(resolve => { setTimeout(resolve, 2300) }));
+  await settle();
+  expect(calls('/api/jav/discoveries/metadata').length).toBeGreaterThanOrEqual(2);
+  const listed = calls('/api/jav/releases');
+  expect(listed).toHaveLength(2);
+  expect(listed.every(([url]) => !String(url).includes('metadata_job_id'))).toBe(true);
+  expect(calls('/api/jav/releases/metadata')).toHaveLength(1);
+  history.replaceState(null, '', before);
+}, 10_000);
 
 it('发现页读取作品资料的进度单独成框', async () => {
   history.replaceState(null, '', '/jav?tab=discover');

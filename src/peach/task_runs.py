@@ -50,6 +50,8 @@ ACTIVE_STATUSES = ("pending", "running")
 #: 终态。只有这四种能进 `finish`，也只有这四种会被 `prune` 回收。
 TERMINAL_STATUSES = ("succeeded", "failed", "cancelled", "interrupted")
 TRIGGERS = ("manual", "scheduled", "startup", "cli")
+#: 任务中心列表每轮下发的已结束后继条数上限，见 `settled_followups`。
+SETTLED_FOLLOWUP_LIMIT = 50
 
 #: 心跳超过这么久没续，且进程也不在了，就按被打断处理。
 #: 取 5 分钟不是因为任务不会更久——单项外部动作的预算是 240 秒（`library_processing`
@@ -100,6 +102,7 @@ TASK_LABELS = {
     "ledger-restore": "从备份恢复账本",
     "upgrade-repairs": "自动修复",
     "upgrade-library": "资料自动修复",
+    "follow-evidence-reclaim": "关注旧快照清理",
     "organize": "按模板整理",
     "batch": "批量操作",
     "scrape-codes": "番号资料刮削",
@@ -496,8 +499,8 @@ class TaskRunStore:
         root = parent.root_run_id or parent.id
         moment = stamp()
         from .task_control import initialize_speed
-        from .update_tasks import _mutex, state_for
-        with _mutex(state_for(self.database.db_path)), self.database.write_transaction(notify=False) as connection:
+        from .update_tasks import gate, state_for
+        with gate(state_for(self.database.db_path)), self.database.write_transaction(notify=False) as connection:
             # 父任务是裸任务时它就是这条链的根。补在这里而不是 `start`：开工那一刻还
             # 不知道这一轮会不会派后继，给每一行都填一个指向自己的 root 是无意义的噪声。
             connection.execute(
@@ -531,8 +534,8 @@ class TaskRunStore:
         if not self.enabled or not run.followup_key:
             return None
         from .task_control import initialize_speed
-        from .update_tasks import _mutex, state_for
-        with _mutex(state_for(self.database.db_path)), self.database.write_transaction(notify=False) as connection:
+        from .update_tasks import gate, state_for
+        with gate(state_for(self.database.db_path)), self.database.write_transaction(notify=False) as connection:
             try:
                 cursor = connection.execute(
                     "INSERT INTO task_run(task_key,trigger,status,mutex_key,pid,host,"
@@ -549,10 +552,13 @@ class TaskRunStore:
         return run_id
 
     def claim_followup(self, task_keys, first=()) -> TaskRun | None:
-        from .update_tasks import admission, UpdateBusy
+        """装更新期间返回 None；闸门锁被别人拿着时抛 `GateBusy`，调用方稍后再领。"""
+        from .update_tasks import admission, GateBusy, UpdateBusy
         try:
             with admission(self.database.db_path):
                 return self._claim_followup(task_keys, first)
+        except GateBusy:
+            raise
         except UpdateBusy:
             return None
 
@@ -615,12 +621,22 @@ class TaskRunStore:
                 (stamp(),))
         return [int(row["id"]) for row in rows]
 
-    def children(self, parent_run_id: int) -> list[TaskRun]:
-        """这一轮派出的后继，按入队顺序。"""
+    def children(self, parent_run_id: int, *, limit: int | None = None) -> list[TaskRun]:
+        """这一轮派出的后继，按入队顺序。
+
+        给了 `limit` 只取最近派出的那么多条，正在跑的另外一条不落：后继按 id 顺序认领，在跑的那条
+        往往是最早的，按 id 取最近几条只剩排队的。总数看 `followup_counts`。
+        """
         with self.database.read_connection() as connection:
-            rows = connection.execute(
-                f"SELECT {_COLUMNS} FROM task_run WHERE parent_run_id=? ORDER BY id",
-                (int(parent_run_id),)).fetchall()
+            if limit is None:
+                rows = connection.execute(
+                    f"SELECT {_COLUMNS} FROM task_run WHERE parent_run_id=? ORDER BY id",
+                    (int(parent_run_id),)).fetchall()
+            else:
+                rows = connection.execute(
+                    f"SELECT {_COLUMNS} FROM task_run WHERE parent_run_id=? AND (status='running' OR id IN ("
+                    "SELECT id FROM task_run WHERE parent_run_id=? ORDER BY id DESC LIMIT ?)) ORDER BY id",
+                    (int(parent_run_id), int(parent_run_id), max(1, int(limit)))).fetchall()
         return [_row(row) for row in rows]
 
     def _due(self, run_id: int, throttle: float) -> bool:
@@ -689,27 +705,34 @@ class TaskRunStore:
                 recovered.append(run.id)
         return recovered
 
-    def prune(self, task_key: str, keep: int = DEFAULT_KEEP) -> int:
+    def prune(self, task_key: str, keep: int = DEFAULT_KEEP, *, keep_errors: bool = False) -> int:
         """每个 task_key 只留最近 `keep` 条终态记录，返回删掉多少条。
 
         活跃任务保留，指向已清退历史的父任务和根任务关联由删除触发器置空。
+        随后清退整个数据根里已结束运行的控制文件（`task_control.prune_controls`），不限本 task_key。
+        后继使用 `keep_errors` 保留仍可重试的失败项；下载状态保留并清空已清退运行的链接。
         阈值用 `LIMIT 1 OFFSET keep` 取「第 keep+1 新的那条 id」。
         """
         if not self.enabled or keep < 0:
             return 0
-        marks = ",".join(f"'{name}'" for name in TERMINAL_STATUSES)
+        states = ('succeeded', 'cancelled') if keep_errors else TERMINAL_STATUSES
+        marks = ",".join(f"'{name}'" for name in states)
         removed = 0
         with self.database.write_transaction(notify=False) as connection:
             threshold = connection.execute(
                 f"SELECT id FROM task_run WHERE task_key=? AND status IN ({marks}) "
                 "ORDER BY id DESC LIMIT 1 OFFSET ?", (task_key, keep)).fetchone()
             if threshold is not None:
+                connection.execute(
+                    "UPDATE download_task SET postprocess_run_id=NULL WHERE postprocess_run_id IN ("
+                    f"SELECT id FROM task_run WHERE task_key=? AND status IN ({marks}) AND id<=?)",
+                    (task_key, threshold["id"]))
                 cursor = connection.execute(
                     f"DELETE FROM task_run WHERE task_key=? AND status IN ({marks}) "
                     "AND id<=?", (task_key, threshold["id"]))
                 removed = cursor.rowcount
-        from .task_control import prune_speeds
-        prune_speeds(self)
+        from .task_control import prune_controls
+        prune_controls(self)
         return removed
 
     # -- 查询 --------------------------------------------------------------
@@ -737,6 +760,22 @@ class TaskRunStore:
         with self.database.read_connection() as connection:
             rows = connection.execute(sql, params).fetchall()
         return [_row(row) for row in rows]
+
+    def active_families(self) -> dict[int, list[tuple[int, str]]]:
+        """每条自己或后代还在排在跑的任务 → 这一族里在排在跑的 `(id, status)`（含自己），按 id 排。
+
+        键与 `live_ids` 相同。任务中心一页里每条在跑的任务都要问「族里谁还活着」：逐条递归查询、
+        逐条开连接，几千条排队后继时一次轮询要好几秒；这里一条查询沿父链往上一次取齐。
+        """
+        families: dict[int, list[tuple[int, str]]] = {}
+        with self.database.read_connection() as connection:
+            for ancestor, run_id, status in connection.execute(
+                    "WITH RECURSIVE up(ancestor, id, status) AS ("
+                    "SELECT id, id, status FROM task_run WHERE status IN ('pending','running') "
+                    "UNION SELECT t.parent_run_id, u.id, u.status FROM task_run t JOIN up u ON t.id=u.ancestor "
+                    "WHERE t.parent_run_id IS NOT NULL) SELECT ancestor, id, status FROM up ORDER BY ancestor, id"):
+                families.setdefault(int(ancestor), []).append((int(run_id), status))
+        return families
 
     def live_ids(self) -> set[int]:
         """自己或某个后代还在排或在跑的任务：在排在跑的那些，连同它们沿父链往上的每一层。
@@ -827,8 +866,12 @@ class TaskRunStore:
         page = [_row(row) for row in rows[:size]]
         return page + self.settled_followups([run.id for run in page]), len(rows) > size
 
-    def settled_followups(self, root_ids) -> list[TaskRun]:
-        """这几轮派出的、已经结束的后继，整条链上的都算。"""
+    def settled_followups(self, root_ids, *, limit: int | None = None) -> list[TaskRun]:
+        """这几轮派出的、已经结束的后继，整条链上的都算；每轮只取最近 `limit` 条。
+
+        任务中心有任务在跑时每两秒取一次，一轮派出上千条后继时不设上限就是每两秒几千行。
+        总数与失败数看 `followup_counts`，卡片展开时再按父任务取全（`/api/tasks/{id}`）。
+        """
         ids = [int(run_id) for run_id in root_ids]
         if not self.enabled or not ids:
             return []
@@ -836,9 +879,11 @@ class TaskRunStore:
         holes = ",".join("?" * len(ids))
         with self.database.read_connection() as connection:
             rows = connection.execute(
-                f"SELECT {_COLUMNS} FROM task_run WHERE root_run_id IN ({holes}) "
-                f"AND id NOT IN ({holes}) AND status IN ({marks}) ORDER BY id",
-                [*ids, *ids]).fetchall()
+                f"SELECT {_COLUMNS} FROM (SELECT *, ROW_NUMBER() OVER ("
+                "PARTITION BY root_run_id ORDER BY id DESC) AS recent FROM task_run "
+                f"WHERE root_run_id IN ({holes}) AND id NOT IN ({holes}) AND status IN ({marks})) "
+                "WHERE recent<=? ORDER BY id",
+                [*ids, *ids, max(1, int(SETTLED_FOLLOWUP_LIMIT if limit is None else limit))]).fetchall()
         return [_row(row) for row in rows]
 
     def active_parents(self) -> list[TaskRun]:

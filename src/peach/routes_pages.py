@@ -1030,6 +1030,8 @@ def entity_route(request: Request, name: str,
 # 配置页是主站里的一屏（island），数据走 `/api/configuration`。未配置时 `index()` 给的是
 # 首次运行表单，正好就是「请先完成首次设置」该长的样子。
 @router.api_route("/settings", methods=["GET", "HEAD"])
+# 「应用与维护」之下的子页「修复与迁移」，不在配置分区里。
+@router.api_route("/settings/maintenance/repairs", methods=["GET", "HEAD"])
 def client_route(request: Request, item_id: int | None = None,
                  args: dict[str, str] = Depends(require_page_auth)):
     return index(request, args)

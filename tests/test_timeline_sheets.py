@@ -164,6 +164,18 @@ class QueueTests(unittest.TestCase):
 
 
 class GenerateLibraryTests(unittest.TestCase):
+    def test_capacity_denial_during_frames_pauses_without_completing_the_asset(self):
+        guard = MagicMock()
+        guard.check.side_effect = [None, None, DiskSpaceDenied('capacity')]
+        def build(*args, active, **kwargs):
+            self.assertTrue(active())
+            active()
+            self.fail('capacity denial must leave the frame loop')
+        with patch.object(timeline_sheets, 'build', side_effect=build):
+            state = self._run(guard=guard)
+        self.assertEqual(state['stopped'], 'capacity')
+        self.assertEqual((state['done'], state['made'], state['failed']), (0, 0, 0))
+
     def test_resume_keeps_counters_and_does_not_build_committed_assets(self):
         saved = dict(completed_assets=[1], done=1, made=1, skipped=0, failed=0)
         built = []
