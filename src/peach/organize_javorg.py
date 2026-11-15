@@ -14,6 +14,8 @@ from pathlib import PureWindowsPath
 from .catalog_rules import (
     code_letter_stem, is_jav_code, normalise_code_key, release_code_from_filename,
 )
+from .organize_rule_words import LEAVE_FOLDER_NAMES
+from .user_messages import UserValueError
 #: 与 javorg organize.c SKIP_ENTIRE 对齐：dvd-back 预设默认填入 skip_dirs。
 SKIP_ENTIRE_TOP: tuple[str, ...] = (
     "guaxiao", "guaxiao1", "JAV_output", "gc", "by-code", "euo",
@@ -23,18 +25,18 @@ SKIP_ENTIRE_TOP: tuple[str, ...] = (
 #: 顶层杂项大目录名（javorg LEAVE_FOLDER）。Peach 只动视频文件，不会整夹搬走。
 LEAVE_FOLDER_TOP: tuple[str, ...] = (
     "001", "002", "259LUXU", "FC2", "new", "newback",
-    "坂井千晴", "新建文件夹", "新建文件夹 (2)", "新建文件夹 (4)", "新建文件夹11",
-    "新建文件夹720P", "欧美机构《啄木鸟》", "迅雷下载", "迅雷下载1",
+    *LEAVE_FOLDER_NAMES,
 )
 
 COLLISION_SKIP = "skip"
 COLLISION_SUFFIX = "suffix"
 COLLISIONS = frozenset({COLLISION_SKIP, COLLISION_SUFFIX})
 
-SKIP_MISC_TREE = "杂项目录跳过"
-SKIP_ONLY_DIRS = "不在仅处理目录内"
-SKIP_PREFIX_RARE = "前缀出现次数未达门槛"
-SKIP_NO_CODE = "无法识别番号"
+#: 可配置规则自己的跳过原因 id，与官方 `SKIP_REASON_IDS` 同一套（ADR-0162）。
+SKIP_MISC_TREE = "miscTree"
+SKIP_ONLY_DIRS = "onlyDirs"
+SKIP_PREFIX_RARE = "prefixRare"
+SKIP_NO_CODE = "noCode"
 
 _SUFFIX_TAIL = re.compile(r"-\d+$")
 
@@ -102,7 +104,7 @@ def _as_name_tuple(raw) -> tuple[str, ...]:
         return tuple(part.strip() for part in parts if part.strip())
     if isinstance(raw, (list, tuple, set)):
         return tuple(str(item).strip() for item in raw if str(item).strip())
-    raise ValueError(f"目录名单须是字符串或列表，收到：{type(raw).__name__}")
+    raise UserValueError("errors.organizeRules.dirListType", {"kind": type(raw).__name__})
 
 
 def normalize_collision(raw) -> str:
@@ -112,7 +114,7 @@ def normalize_collision(raw) -> str:
     if text in {"suffix", "number", "javorg", "-1", "disambiguate"}:
         return COLLISION_SUFFIX
     if text not in COLLISIONS:
-        raise ValueError(f"不认识的撞名策略：{raw}")
+        raise UserValueError("errors.organizeRules.unknownCollision", {"value": str(raw)})
     return text
 
 
@@ -126,7 +128,7 @@ def normalize_mode(raw) -> str:
     if text in {"guaxiao", "gx"}:
         return "guaxiao"
     if text not in PRESET_RULES:
-        raise ValueError(f"不认识的 javorg 整理预设：{raw}")
+        raise UserValueError("errors.organizeRules.unknownPreset", {"value": str(raw)})
     return text
 
 
@@ -146,9 +148,10 @@ def parse_rules(raw=None, *, javorg_mode: str = "") -> OrganizeRules:
         try:
             prefix_min_count = int(payload["prefix_min_count"])
         except (TypeError, ValueError) as exc:
-            raise ValueError(f"前缀门槛须是整数：{payload['prefix_min_count']}") from exc
+            raise UserValueError("errors.organizeRules.prefixNotInteger",
+                                 {"value": str(payload["prefix_min_count"])}) from exc
         if prefix_min_count < 0:
-            raise ValueError("前缀门槛不能为负")
+            raise UserValueError("errors.organizeRules.prefixNegative")
     else:
         prefix_min_count = base.prefix_min_count
     collision = (normalize_collision(payload["collision"]) if has("collision")
@@ -299,11 +302,16 @@ def prefix_counts_for(rows) -> Counter[str]:
 
 def rules_public_meta() -> dict:
     """给前端：默认值、撞名选项、预设规则、dvd-back 默认跳过名单。"""
+    from . import interface_text
+
+    def label(code: str) -> dict[str, str]:
+        return {"label": interface_text.text(f"server:{code}"), "label_code": code}
+
     return {
         "defaults": OrganizeRules().as_dict(),
         "collisions": [
-            {"id": COLLISION_SKIP, "label": "跳过（目标已存在）"},
-            {"id": COLLISION_SUFFIX, "label": "加 -1/-2 消歧"},
+            {"id": COLLISION_SKIP, **label("labels.organize.collision.skip")},
+            {"id": COLLISION_SUFFIX, **label("labels.organize.collision.suffix")},
         ],
         "preset_rules": {key: rules.as_dict() for key, rules in PRESET_RULES.items()},
         "skip_dirs_dvd_back": list(SKIP_ENTIRE_TOP),
@@ -321,7 +329,7 @@ def under_skip_entire(root: str, path: str) -> bool:
 
 
 def build_javorg_plan(*_a, **_k):
-    raise RuntimeError("build_javorg_plan 已弃用：请走 organize.build_plan 的 rules 字段")
+    raise RuntimeError("build_javorg_plan is retired; use organize.build_plan rules")
 
 
 __all__ = [
